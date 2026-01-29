@@ -11,18 +11,6 @@ estados <- c("AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
 # Criando um vetor com os anos considerados (2012 a 2024)
 anos <- c(2012:2024)
 
-# # Criando uma função para calcular a diferença, em dias, entre duas datas
-# datediff <- function(mindate, maxdate) {
-#   diff <- as.numeric(difftime(maxdate, mindate, units = "days"))
-#   return(diff)
-# }
-#
-# # Criando uma função para calcular a idade em anos (a partir da data de nascimento e de uma certa data)
-# calc_idade <- function(nascimento, data) {
-#   idade <- as.numeric(difftime(data, nascimento, units = "days")) / 365.25
-#   return(floor(idade))
-# }
-
 # Criando um vetor que contém o diretório original do projeto
 diretorio_original <- getwd()
 
@@ -65,7 +53,7 @@ for (estado in estados) {
   output_dir <- "data-raw/morbidade/databases/01_sih_rd/02_arquivos_tratados_long"
   if (!dir.exists(output_dir)) {dir.create(output_dir)}
 
-  write.csv(df_aih, glue("{output_dir}/{estado}_sih_rd_tratado_long_{anos[1]}_{anos[length(anos)]}.csv"), row.names = FALSE)
+  write.csv(df_aih_completo, glue("{output_dir}/{estado}_sih_rd_tratado_long_{anos[1]}_{anos[length(anos)]}.csv"), row.names = FALSE)
 
   # Limpando a memória
   rm(df_aih, df_aih_completo)

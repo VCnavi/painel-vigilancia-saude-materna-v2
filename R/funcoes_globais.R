@@ -206,8 +206,8 @@ filtra_colunas_evitaveis_principais <- function(
   dt <- data.table::as.data.table(data)
 
   todas_fases <- length(momentos) == 3
-  pesos_pat   <- paste(pesos, collapse = "|")
-  momentos_pat <- paste(momentos, collapse = "|")
+  pesos_pat   <- if (!is.null(pesos)) paste(pesos, collapse = "|") else FALSE
+  momentos_pat <- if (!is.null(momentos)) paste(momentos, collapse = "|") else FALSE
 
   # Seleção das colunas alvo
   alvo_cols <- names(dt)[
@@ -289,21 +289,19 @@ processa_causas <- function(
   )
 
   # 2. Filtragem por grupos (se houver)
-  if (!is.null(grupos)) {
-    padrao <- paste(grupos, collapse = "|")
-    dt_graficos[, grupo_cid10 := as.character(grupo_cid10)]
-    dt_graficos[, grupo_cid10 := data.table::fifelse(
-      grepl(padrao, grupo_cid10),
-      grupo_cid10,
-      "Grupos não selecionados"
-    )]
-    dt_resumo[, grupo_cid10 := as.character(grupo_cid10)]
-    dt_resumo[, grupo_cid10 := data.table::fifelse(
-      grepl(padrao, grupo_cid10),
-      grupo_cid10,
-      "Grupos não selecionados"
-    )]
-  }
+  padrao <- if (!is.null(grupos)) paste(grupos, collapse = "|") else FALSE
+  dt_graficos[, grupo_cid10 := as.character(grupo_cid10)]
+  dt_graficos[, grupo_cid10 := data.table::fifelse(
+    grepl(padrao, grupo_cid10),
+    grupo_cid10,
+    "Total de causas não selecionadas"
+  )]
+  dt_resumo[, grupo_cid10 := as.character(grupo_cid10)]
+  dt_resumo[, grupo_cid10 := data.table::fifelse(
+    grepl(padrao, grupo_cid10),
+    grupo_cid10,
+    "Total de causas não selecionadas"
+  )]
 
   # 3. Renomear grupos
   ## Função para renomear grupos dentro do data.table
@@ -320,10 +318,9 @@ processa_causas <- function(
         grepl("recem_nascido", grupo_cid10), "Adequada atenção ao recém nascido",
         grepl("tratamento", grupo_cid10), "Ações de diagnóstico e tratamento adequado",
         grepl("saude", grupo_cid10), "Ações de promoção à saúde vinculadas a ações de atenção",
-        grepl("mal_definidas", grupo_cid10), "Causas mal definidas",
-        grepl("nao_aplica", grupo_cid10), "Causa básica não se aplica a um óbito fetal",
-        grepl("outros", grupo_cid10), "Causas não claramente evitáveis",
-        default = "Grupos não selecionados"
+        grepl("mal_definidas", grupo_cid10), "Causas de morte mal-definidas",
+        grepl("outros", grupo_cid10), "Demais causas (não claramente evitáveis)",
+        default = "Total de causas não selecionadas"
       )]
     } else if (startsWith(prefixo_coluna, "principais")) {
       dt[, grupo_cid10 := data.table::fcase(
@@ -334,9 +331,9 @@ processa_causas <- function(
         grepl("respiratorias", grupo_cid10), "Afecções respiratórias do recém-nascido",
         grepl("gravidez", grupo_cid10), "Fatores maternos relacionados à gravidez",
         grepl("afeccoes", grupo_cid10), "Afecções originais no período perinatal",
-        grepl("mal_definida", grupo_cid10), "Mal definidas",
+        grepl("mal_definida", grupo_cid10), "Mal-definidas",
         grepl("outros", grupo_cid10), "Demais causas",
-        default = "Grupos não selecionados"
+        default = "Total de causas não selecionadas"
       )]
     } else {
       stop("Prefixo de coluna não reconhecido para renomeação dos grupos.")
@@ -354,10 +351,9 @@ processa_causas <- function(
     "Adequada atenção à mulher na gestação",
     "Adequada atenção à mulher no parto",
     "Imunoprevenção",
-    "Grupos não selecionados",
-    "Causas mal definidas",
-    "Causa básica não se aplica a um óbito fetal",
-    "Causas não claramente evitáveis"
+    "Causas de morte mal-definidas",
+    "Demais causas (não claramente evitáveis)",
+    "Total de causas não selecionadas"
   )
 
   ## Definições de níveis gerais para outros casos (ex: evitaveis não fetais)
@@ -368,9 +364,9 @@ processa_causas <- function(
     "Adequada atenção ao recém nascido",
     "Ações de diagnóstico e tratamento adequado",
     "Ações de promoção à saúde vinculadas a ações de atenção",
-    "Causas mal definidas",
-    "Grupos não selecionados",
-    "Causas não claramente evitáveis"
+    "Causas de morte mal-definidas",
+    "Demais causas (não claramente evitáveis)",
+    "Total de causas não selecionadas"
   )
 
   ## Definições para o grupo 'principais' (exemplo: principais_fetal)
@@ -382,9 +378,9 @@ processa_causas <- function(
     "Afecções respiratórias do recém-nascido",
     "Prematuridade",
     "Afecções originais no período perinatal",
-    "Mal definidas",
-    "Grupos não selecionados",
-    "Demais causas"
+    "Mal-definidas",
+    "Demais causas",
+    "Total de causas não selecionadas"
   )
 
   # Escolha o padrão de renomeação e níveis com base no prefixo_coluna
@@ -424,7 +420,7 @@ processa_causas <- function(
       list(
         graficos = as.data.frame(dt_graficos),
         resumo = as.data.frame(dt_resumo) |>
-          dplyr::filter(!(grupo_cid10 %in% c("Causas mal definidas", "Causas não claramente evitáveis"))) |>
+          dplyr::filter(!(grupo_cid10 %in% c("Causas de morte mal-definidas", "Demais causas (não claramente evitáveis)"))) |>
           dplyr::summarise(porc_obitos_evitaveis = sum(porc_obitos))
       )
     } else {

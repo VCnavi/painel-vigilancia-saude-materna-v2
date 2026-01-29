@@ -413,13 +413,13 @@ Silhueta e Calinski-Harabasz, o número de grupos adotado foi 3. </div>",
         session,
         inputId = "indicador_uma_caixinha_adicional_bloco7",
         choices = c(
-          "Reduzíveis por ações de imunização" = "imunoprevencao",
+          "Imunoprevenção" = "imunoprevencao",
           "Reduzíveis por adequada atenção à mulher na gestação" = "mulher_gestacao",
           "Reduzíveis por adequada atenção à mulher no parto" = "parto",
           "Reduzíveis por adequada atenção ao recém-nascido" = "recem_nascido",
           "Reduzíveis por ações de promoção à saúde vinculadas a ações de atenção" = "saude",
           "Reduzíveis por ações de diagnóstico e tratamento adequado" = "tratamento",
-          "Reduzíveis por causas mal definidas" = "mal_definidas" #,
+          "Causas de morte mal-definidas" = "mal_definidas" #,
           # "Reduzíveis por demais causas" = "outros"
         ),
         label = "Grupos de interesse"
@@ -444,7 +444,7 @@ Silhueta e Calinski-Harabasz, o número de grupos adotado foi 3. </div>",
           "Afecções respiratórias do recém-nascido" = "respiratorias",
           "Fatores maternos relacionados à gravidez" = "gravidez",
           "Afecções originais no período perinatal" = "afeccoes",
-          "Causas mal definidas" = "mal_definidas" #,
+          "Causas mal-definidas" = "mal_definidas" #,
           #"Demais causas" = "outros"
         ),
         label = "Grupos de interesse"
@@ -466,7 +466,7 @@ Silhueta e Calinski-Harabasz, o número de grupos adotado foi 3. </div>",
           "Afecções respiratórias do recém-nascido" = "afeccoes_respiratorias",
           "Fatores maternos relacionados à gravidez" = "fatores_maternos",
           "Afecções originais no período perinatal" = "afeccoes_perinatal",
-          "Mal definidas" = "mal_definidas",
+          "Mal-definidas" = "mal_definidas",
           "Icterícia neonatal" = "ictericia",
           "Transtornos endócrinos e metabólicos transitórios específicos do feto e do recém-nascido" = "endocrinos",
           "Problemas de alimentação do recém-nascido" = "alimentacao",
@@ -485,11 +485,12 @@ Silhueta e Calinski-Harabasz, o número de grupos adotado foi 3. </div>",
         session,
         inputId = "indicador_uma_caixinha_adicional_bloco7",
         choices = c(
-          'Evitáveis por "Imunoprevenção"' = "imunoprevencao",
-          'Evitáveis por "Adequada atenção à mulher na gestação"' = "mulher_gestacao",
-          'Evitáveis por "Adequada atenção à mulher no parto"' = "parto",
-          'Evitáveis por "Causas básicas que não se aplicam a um óbito fetal"' = "nao_se_aplica",
-          'Evitáveis por "Causas mal definidas"' = "mal_definidas"
+          "Imunoprevenção" = "imunoprevencao",
+          "Reduzíveis por adequada atenção à mulher na gestação" = "mulher_gestacao",
+          "Reduzíveis por adequada atenção à mulher no parto" = "parto",
+          "Causas de morte mal-definidas" = "mal_definidas",
+          "Inconsistente (não se aplicam ao óbito fetal)" = "nao_aplica",
+          "Demais causas (não claramente evitáveis)" = "outros"
         ),
         label = "Grupos de interesse"
       )
@@ -510,7 +511,7 @@ Silhueta e Calinski-Harabasz, o número de grupos adotado foi 3. </div>",
           #"Afecções respiratórias do recém-nascido" = "respiratorias",
           "Fatores maternos relacionados à gravidez" = "gravidez",
           "Afecções originais no período perinatal" = "afeccoes" #,
-          #"Causas mal definidas" = "mal_definidas",
+          #"Causas mal-definidas" = "mal_definidas",
           #"Demais causas" = "outros"
         ),
         label = "Grupos de interesse"

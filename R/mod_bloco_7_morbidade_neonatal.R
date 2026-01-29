@@ -277,7 +277,7 @@ mod_bloco_7_morbidade_neonatal_ui <- function(id) {
               style = "height: 700px; padding-top: 0; padding-bottom: 0; overflow-y: auto",
               div(
                 style = "height: 7%; display: flex; align-items: center;",
-                HTML("<b class = 'fonte-muito-grande'> Distribuição percentual das internações neonatais por grupos de causas segundo <a href = https://www.scielo.br/j/csp/a/Ss5zQXrmrGrGJvcVMKmJdqR/?format=pdf&lang=pt , target = _blank>França e Lansky (2009)</a> &nbsp;</b>")
+                HTML("<b class = 'fonte-muito-grande'> Distribuição percentual das internações neonatais por grupos de causas segundo <a href = https://bvsms.saude.gov.br/bvs/publicacoes/demografia_saude_contribuicao_tendencias.pdf , target = _blank>França e Lansky (2009)</a> &nbsp;</b>")
               ),
               hr(),
               fluidRow(
@@ -295,7 +295,7 @@ mod_bloco_7_morbidade_neonatal_ui <- function(id) {
                       "Afecções respiratórias do recém-nascido" = "afeccoes_respiratorias",
                       "Fatores maternos relacionados à gravidez" = "fatores_maternos",
                       "Afecções originais no período perinatal" = "afeccoes_perinatal",
-                      "Mal definidas" = "mal_definidas",
+                      "Mal-definidas" = "mal_definidas",
                       "Icterícia neonatal" = "ictericia",
                       "Transtornos endócrinos e metabólicos transitórios específicos do feto e do recém-nascido" = "endocrinos",
                       "Problemas de alimentação do recém-nascido"= "alimentacao",
@@ -724,7 +724,7 @@ mod_bloco_7_morbidade_neonatal_server <- function(id, filtros){
             grepl("afeccoes_respiratorias", grupo_cid10) ~ "Afecções respiratórias do recém-nascido",
             grepl("fatores_maternos", grupo_cid10) ~ "Fatores maternos relacionados à gravidez",
             grepl("afeccoes_perinatal", grupo_cid10) ~ "Afecções originais no período perinatal",
-            grepl("mal_definidas", grupo_cid10) ~ "Mal definidas",
+            grepl("mal_definidas", grupo_cid10) ~ "Mal-definidas",
             grepl("ictericia", grupo_cid10) ~ "Icterícia neonatal",
             grepl("endocrinos", grupo_cid10) ~ "Transtornos endócrinos e metabólicos",
             grepl("alimentacao", grupo_cid10) ~ "Problemas de alimentação do recém-nascido",
@@ -753,6 +753,13 @@ mod_bloco_7_morbidade_neonatal_server <- function(id, filtros){
     }, ignoreNULL = FALSE)
 
     data7_localidade_principais <- reactive({
+      validate(
+        need(
+          !is.null(input$input_principais_momento),
+          "⚠ Não existem ocorrências de internações neonatais para os filtros selecionados."
+        )
+      )
+
       data_filtrada_morbidade_graficos() |>
         dplyr::summarise_at(dplyr::vars(dplyr::contains("morbidade_neonatal_grupos")), sum) |>
         dplyr::rowwise() |>
@@ -774,7 +781,7 @@ mod_bloco_7_morbidade_neonatal_server <- function(id, filtros){
               grepl("afeccoes_respiratorias", grupo_cid10) ~ "Afecções respiratórias do recém-nascido",
               grepl("fatores_maternos", grupo_cid10) ~ "Fatores maternos relacionados à gravidez",
               grepl("afeccoes_perinatal", grupo_cid10) ~ "Afecções originais no período perinatal",
-              grepl("mal_definidas", grupo_cid10) ~ "Mal definidas",
+              grepl("mal_definidas", grupo_cid10) ~ "Mal-definidas",
               grepl("ictericia", grupo_cid10) ~ "Icterícia neonatal",
               grepl("endocrinos", grupo_cid10) ~ "Transtornos endócrinos e metabólicos",
               grepl("alimentacao", grupo_cid10) ~ "Problemas de alimentação do recém-nascido",
@@ -820,7 +827,7 @@ mod_bloco_7_morbidade_neonatal_server <- function(id, filtros){
         dplyr::mutate(grupo_cid10 = factor(grupo_cid10, levels = c("Prematuridade","Infecções","Asfixia/Hipóxia","Anomalia congênita","Afecções respiratórias do recém-nascido",
                                                                    "Fatores maternos relacionados à gravidez","Afecções originais no período perinatal",
                                                                    "Icterícia neonatal",  "Transtornos endócrinos e metabólicos",
-                                                                   "Problemas de alimentação do recém-nascido", "Transtornos cardíacos do período perinatal", "Mal definidas",
+                                                                   "Problemas de alimentação do recém-nascido", "Transtornos cardíacos do período perinatal", "Mal-definidas",
                                                                    "Grupos não selecionados", "Demais causas")),
                       ano = factor(ano, levels = filtros()$ano2[2]:filtros()$ano2[1]))
     })
@@ -858,6 +865,13 @@ mod_bloco_7_morbidade_neonatal_server <- function(id, filtros){
     }, ignoreNULL = FALSE)
 
     data7_comp_principais <- reactive({
+      validate(
+        need(
+          !is.null(input$input_principais_momento),
+          "⚠ Não existem ocorrências de internações neonatais para os filtros selecionados."
+        )
+      )
+
       data_filtrada_comp_morbidade_graficos() |>
         dplyr::summarise_at(dplyr::vars(dplyr::contains("morbidade_neonatal_grupos")), sum) |>
         dplyr::rowwise() |>
@@ -879,7 +893,7 @@ mod_bloco_7_morbidade_neonatal_server <- function(id, filtros){
               grepl("afeccoes_respiratorias", grupo_cid10) ~ "Afecções respiratórias do recém-nascido",
               grepl("fatores_maternos", grupo_cid10) ~ "Fatores maternos relacionados à gravidez",
               grepl("afeccoes_perinatal", grupo_cid10) ~ "Afecções originais no período perinatal",
-              grepl("mal_definidas", grupo_cid10) ~ "Mal definidas",
+              grepl("mal_definidas", grupo_cid10) ~ "Mal-definidas",
               grepl("ictericia", grupo_cid10) ~ "Icterícia neonatal",
               grepl("endocrinos", grupo_cid10) ~ "Transtornos endócrinos e metabólicos",
               grepl("alimentacao", grupo_cid10) ~ "Problemas de alimentação do recém-nascido",
@@ -926,7 +940,7 @@ mod_bloco_7_morbidade_neonatal_server <- function(id, filtros){
         dplyr::mutate(grupo_cid10 = factor(grupo_cid10, levels = c("Prematuridade","Infecções","Asfixia/Hipóxia","Anomalia congênita","Afecções respiratórias do recém-nascido",
                                                                    "Fatores maternos relacionados à gravidez","Afecções originais no período perinatal",
                                                                    "Icterícia neonatal",  "Transtornos endócrinos e metabólicos",
-                                                                   "Problemas de alimentação do recém-nascido", "Transtornos cardíacos do período perinatal", "Mal definidas",
+                                                                   "Problemas de alimentação do recém-nascido", "Transtornos cardíacos do período perinatal", "Mal-definidas",
                                                                    "Grupos não selecionados", "Demais causas")),
                       ano = factor(ano, levels = filtros()$ano2[2]:filtros()$ano2[1]))
     })
@@ -965,6 +979,13 @@ mod_bloco_7_morbidade_neonatal_server <- function(id, filtros){
     }, ignoreNULL = FALSE)
 
     data7_referencia_principais <- reactive({
+      validate(
+        need(
+          !is.null(input$input_principais_momento),
+          "⚠ Não existem ocorrências de internações neonatais para os filtros selecionados."
+        )
+      )
+
       bloco7_dist_morbidade |>
         dplyr::filter(
           ano >= filtros()$ano2[1] & ano <= filtros()$ano2[2]
@@ -990,7 +1011,7 @@ mod_bloco_7_morbidade_neonatal_server <- function(id, filtros){
               grepl("afeccoes_respiratorias", grupo_cid10) ~ "Afecções respiratórias do recém-nascido",
               grepl("fatores_maternos", grupo_cid10) ~ "Fatores maternos relacionados à gravidez",
               grepl("afeccoes_perinatal", grupo_cid10) ~ "Afecções originais no período perinatal",
-              grepl("mal_definidas", grupo_cid10) ~ "Mal definidas",
+              grepl("mal_definidas", grupo_cid10) ~ "Mal-definidas",
               grepl("ictericia", grupo_cid10) ~ "Icterícia neonatal",
               grepl("endocrinos", grupo_cid10) ~ "Transtornos endócrinos e metabólicos",
               grepl("alimentacao", grupo_cid10) ~ "Problemas de alimentação do recém-nascido",
@@ -1009,7 +1030,7 @@ mod_bloco_7_morbidade_neonatal_server <- function(id, filtros){
         dplyr::mutate(grupo_cid10 = factor(grupo_cid10, levels = c("Prematuridade","Infecções","Asfixia/Hipóxia","Anomalia congênita","Afecções respiratórias do recém-nascido",
                                                                    "Fatores maternos relacionados à gravidez","Afecções originais no período perinatal",
                                                                    "Icterícia neonatal",  "Transtornos endócrinos e metabólicos",
-                                                                   "Problemas de alimentação do recém-nascido", "Transtornos cardíacos do período perinatal", "Mal definidas",
+                                                                   "Problemas de alimentação do recém-nascido", "Transtornos cardíacos do período perinatal", "Mal-definidas",
                                                                    "Grupos não selecionados", "Demais causas")),
                       ano = factor(ano, levels = filtros()$ano2[2]:filtros()$ano2[1]))
     })
@@ -1450,7 +1471,7 @@ mod_bloco_7_morbidade_neonatal_server <- function(id, filtros){
             type = "column",
             showInLegend = TRUE,
             tooltip = list(
-              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
+              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> &thinsp;&emsp;Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
             )
           )
       } else {
@@ -1461,7 +1482,7 @@ mod_bloco_7_morbidade_neonatal_server <- function(id, filtros){
             type = "column",
             showInLegend = TRUE,
             tooltip = list(
-              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
+              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> &thinsp;&emsp;Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
             ),
             stack = 0
           ) |>
@@ -1471,7 +1492,7 @@ mod_bloco_7_morbidade_neonatal_server <- function(id, filtros){
             type = "column",
             showInLegend = FALSE,
             tooltip = list(
-              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
+              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> &thinsp;&emsp;Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
             ),
             stack = 1
           )

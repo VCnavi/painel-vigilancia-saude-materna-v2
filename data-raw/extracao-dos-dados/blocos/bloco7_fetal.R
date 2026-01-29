@@ -280,15 +280,14 @@ codigos_municipios <- read.csv("data-raw/extracao-dos-dados/blocos/databases_aux
 df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2012:2024)), ano = 2012:2024)
 
 ## Definindo os vetores de CIDs
-df_cids_evitaveis <- read_excel("data-raw/extracao-dos-dados/blocos/databases_auxiliares/evitabilidade_fetal.xlsx", sheet = "Fetal") |>
+df_cids_evitaveis <- read.csv("data-raw/extracao-dos-dados/blocos/databases_auxiliares/evitabilidade_fetal_atualizado.csv") |>
   dplyr::rename(nome = LBE_FETAL, cid = CID)
 
 lista_cids_evitaveis <- list(
   imunoprevencao = df_cids_evitaveis |> dplyr::filter(nome == "Imunoprevenção") |> dplyr::pull(cid),
   gestacao = df_cids_evitaveis |> dplyr::filter(nome == "Reduzíveis por adequada atenção à mulher na gestação") |> dplyr::pull(cid),
   parto = df_cids_evitaveis |> dplyr::filter(nome == "Reduzíveis por adequada atenção à mulher no parto") |> dplyr::pull(cid),
-  mal_definidas = df_cids_evitaveis |> dplyr::filter(nome == "Causas de morte mal-definidas") |> dplyr::pull(cid),
-  nao_aplica = df_cids_evitaveis |> dplyr::filter(nome == "Não se aplicam ao óbito fetal") |> dplyr::pull(cid)
+  mal_definidas = df_cids_evitaveis |> dplyr::filter(nome == "Causas de morte mal-definidas") |> dplyr::pull(cid)
 )
 
 ## Criando uma função para categorizar CIDs de acordo com os grupos de causas evitáveis
@@ -308,7 +307,7 @@ cria_grupo_evitavel <- function(data, lista_cids, prefixo, filtro_obitoparto = N
       causabas2 = substr(causabas, 1, 3),
       faixa_de_peso = dplyr::case_when(
         is.na(peso) ~ "sem_informacao",
-        peso < 1000 ~ "menor_1000",
+        peso < 1000 ~ "menos_1000",
         peso < 1500 ~ "1000_a_1499",
         peso < 2500 ~ "1500_a_2499",
         peso >= 2500 ~ "2500_mais"
@@ -317,7 +316,6 @@ cria_grupo_evitavel <- function(data, lista_cids, prefixo, filtro_obitoparto = N
         causabas %in% lista_cids$imunoprevencao | causabas2 %in% lista_cids$imunoprevencao ~ paste0(prefixo, "_imunoprevencao"),
         causabas %in% lista_cids$gestacao | causabas2 %in% lista_cids$gestacao ~ paste0(prefixo, "_mulher_gestacao"),
         causabas %in% lista_cids$parto | causabas2 %in% lista_cids$parto ~ paste0(prefixo, "_parto"),
-        causabas %in% lista_cids$nao_aplica | causabas2 %in% lista_cids$nao_aplica ~ paste0(prefixo, "_nao_aplica"),
         causabas %in% lista_cids$mal_definidas | causabas2 %in% lista_cids$mal_definidas ~ paste0(prefixo, "_mal_definidas"),
         TRUE ~ paste0(prefixo, "_outros")
       )
@@ -426,7 +424,7 @@ cria_grupo_causa <- function(data, lista_cids, prefixo, filtro_obitoparto = NULL
       causabas2 = substr(causabas, 1, 3),
       faixa_de_peso = dplyr::case_when(
         is.na(peso) ~ "sem_informacao",
-        peso < 1000 ~ "menor_1000",
+        peso < 1000 ~ "menos_1000",
         peso < 1500 ~ "1000_a_1499",
         peso < 2500 ~ "1500_a_2499",
         peso >= 2500 ~ "2500_mais"

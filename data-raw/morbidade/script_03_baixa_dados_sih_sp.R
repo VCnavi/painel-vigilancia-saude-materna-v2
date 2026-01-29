@@ -31,7 +31,7 @@ processa_uf_sih_sp <- function(uf_sigla, anos, sih_rd_dir, sih_sp_dir) {
   df_sih_sp_uf <- data.table()
 
   # Lendo vetor de N_AIH da base SIH-RD já baixada para a UF e anos
-  naih_sih_rd <- fread(glue("{sih_rd_dir}/{uf_sigla}_sih_rd_bruto_{min(anos)}_{max(anos)}.csv.gz"))[, N_AIH]
+  naih_sih_rd <- fread(glue("{sih_rd_dir}/{uf_sigla}_sih_rd_bruto_{min(anos)}_{max(anos)}.csv"))[, N_AIH]
 
   # Loop para baixar dados SIH-SP e filtrar apenas pelos SP_NAIH que têm correspondência na base do SIH-RD
   for (ano in anos) {

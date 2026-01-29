@@ -123,12 +123,7 @@ app_ui <- function(request) {
               text = "- Mortalidade fetal, perinatal e neonatal e morbidade neonatal",
               tabName = "bloco_7",
               icon = icon("7")
-            ) #,
-            # bs4Dash::bs4SidebarMenuSubItem(
-            #   text = "- Gráfico de radar",
-            #   tabName = "bloco_9",
-            #   icon = icon("8")
-            # )
+            )
           ),
           bs4Dash::bs4SidebarMenuItem(
             text = HTML("<b>Nível 3: Visão detalhada dos indicadores </b>"),
@@ -552,7 +547,7 @@ app_ui <- function(request) {
                 )
               ),
               conditionalPanel(
-                condition = "input.comparar == 'Sim' & input.abas != 'bloco_4' & input.abas != 'bloco_9'",
+                condition = "input.comparar == 'Sim' & input.abas != 'bloco_4'",
                 fluidRow(
                   column(
                     width = 12,
@@ -844,14 +839,6 @@ app_ui <- function(request) {
           bs4Dash::bs4TabItem(
             tabName = "bloco_7",
             mod_bloco_7_ui("bloco_7_1")
-          ),
-          # bs4Dash::bs4TabItem(
-          #   tabName = "bloco_8",
-          #   mod_bloco_8_ui("bloco_8_1")
-          # ),
-          bs4Dash::bs4TabItem(
-            tabName = "bloco_9",
-            mod_bloco_9_ui("bloco_9_1")
           ),
           bs4Dash::bs4TabItem(
             tabName = "nivel_3",

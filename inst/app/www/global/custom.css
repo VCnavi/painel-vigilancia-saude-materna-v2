@@ -351,3 +351,75 @@
 .pretty.p-icon input:checked + .state label {
   font-weight: bold !important;
 }
+
+
+/*------------------------------------*\
+  #HIGHCHARTS
+\*------------------------------------*/
+
+.highcharts-tooltip > span {
+    margin-left: -6px !important;
+    padding-left: 6px !important;
+}
+
+.highcharts-axis-line {
+  stroke: rgb(204, 214, 235) !important;
+}
+
+.highcharts-text-outline {
+  display: none !important;
+}
+
+.highcharts-data-label text {
+  font-size: 11px !important;
+  text-shadow: none !important;
+}
+
+.highcharts-axis {
+  font-size: 16px !important;
+}
+
+.highcharts-legend-item {
+  font-size: 16px !important;
+}
+
+.highcharts-axis-labels {
+  font-size: 15px !important;
+}
+
+/* Ajustes para telas pequenas */
+@media (max-width: 1920px) {
+  .highcharts-axis {
+    font-size: 14.4px !important;
+  }
+
+  .highcharts-legend-item {
+    font-size: 14.4px !important;
+  }
+
+  .highcharts-axis-labels {
+    font-size: 13.5px !important;
+  }
+
+  .highcharts-data-label text {
+    font-size: 9.9px !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .highcharts-axis {
+    font-size: 12.8px !important;
+  }
+
+  .highcharts-legend-item {
+    font-size: 12.8px !important;
+  }
+
+  .highcharts-axis-labels {
+    font-size: 12px !important;
+  }
+
+  .highcharts-data-label text {
+    font-size: 8.8px !important;
+  }
+}

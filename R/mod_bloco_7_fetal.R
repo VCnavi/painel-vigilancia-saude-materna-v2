@@ -452,7 +452,7 @@ mod_bloco_7_fetal_ui <- function(id) {
               style = "height: 700px; padding-top: 0; padding-bottom: 0; overflow-y: auto",
               div(
                 style = "height: 7%; display: flex; align-items: center;",
-                HTML("<b class = 'fonte-muito-grande'> Distribuição percentual dos óbitos fetais por grupos de causas segundo <a href = https://www.scielo.br/j/csp/a/Ss5zQXrmrGrGJvcVMKmJdqR/?format=pdf&lang=pt , target = _blank>França e Lansky (2009)</a> &nbsp;</b>")
+                HTML("<b class = 'fonte-muito-grande'> Distribuição percentual dos óbitos fetais por grupos de causas segundo <a href = https://bvsms.saude.gov.br/bvs/publicacoes/demografia_saude_contribuicao_tendencias.pdf , target = _blank>França e Lansky (2009)</a> &nbsp;</b>")
               ),
               hr(),
               fluidRow(
@@ -473,7 +473,7 @@ mod_bloco_7_fetal_ui <- function(id) {
                       "Anomalia congênita" = "ma_formacao",
                       "Fatores maternos relacionados à gravidez " = "gravidez",
                       "Afecções originais no período perinatal" = "afeccoes",
-                      "Mal definidas" = "mal_definida",
+                      "Mal-definidas" = "mal_definida",
                       "Demais causas" = "outros"
 
                     ),
@@ -548,7 +548,7 @@ mod_bloco_7_fetal_ui <- function(id) {
               style = "height: 700px; padding-top: 0; padding-bottom: 0; overflow-y: auto",
               div(
                 style = "height: 7%; display: flex; align-items: center;",
-                HTML("<b class = 'fonte-muito-grande'> Distribuição percentual dos óbitos fetais segundo análise de evitabilidade do <a href = 'https://www.scielo.br/j/ress/a/cF66ngM4VB3YXV7Js8WynXC/?format=pdf&lang=pt' target = _blank>artigo de Vieira et Al (2011)</a> &nbsp;</b>")),
+                HTML("<b class = 'fonte-muito-grande'> Distribuição percentual dos óbitos fetais segundo análise de evitabilidade baseada em <a href = 'https://www.scielo.br/j/csp/a/Rf4nPNxMhWxBzgznsc86Cmd/?format=html&lang=pt' target = _blank>Fonseca, S.C. et al (2021)</a> &nbsp;</b>")),
               hr(),
               fluidRow(
                 column(
@@ -559,11 +559,10 @@ mod_bloco_7_fetal_ui <- function(id) {
                     options = list(placeholder = "Selecione, aqui, os grupos de interesse", `actions-box` = TRUE, `deselect-all-text` = "Desselecionar todas", `select-all-text` = "Selecionar todas", `none-selected-text` = "Nenhuma opção selecionada"),
                     choices = c(
                       "Imunoprevenção" = "imunoprevencao",
-                      "Mortes reduzíveis por adequada atenção à mulher na gestação" = "mulher_gestacao",
-                      "Mortes reduzíveis por adequada atenção à mulher no parto" = "parto",
+                      "Reduzíveis por adequada atenção à mulher na gestação" = "mulher_gestacao",
+                      "Reduzíveis por adequada atenção à mulher no parto" = "parto",
                       "Causas de morte mal-definidas" = "mal_definidas",
-                      "Causa básica não se aplica ao óbito fetal" = "nao_aplica",
-                      "Causas não claramente evitáveis" = "outros"
+                      "Demais causas (não claramente evitáveis)" = "outros"
                     ),
                     selected = c(
                       "imunoprevencao",
@@ -920,19 +919,73 @@ mod_bloco_7_fetal_server <- function(id, filtros){
 
     ## Calculando os indicadores para a localidade escolhida ------------------
     ### A função processa_bloco7 retorna dataframes do resumo e dos gráficos
-    dfs_localidade_obitos_taxa <- reactive(processa_bloco7(bloco7_fetal_localidade(), input, filtros(), cols_num_obitos_taxa, indicadores_num_obitos_taxa))
-    dfs_localidade_distribuicao_peso <- reactive(processa_bloco7(bloco7_fetal_localidade(), input, filtros(), cols_distribuicao_peso, indicadores_distribuicao_peso))
-    dfs_localidade_distribuicao_momento <- reactive(processa_bloco7(bloco7_fetal_localidade(), input, filtros(), cols_distribuicao_momento, indicadores_distribuicao_momento))
-    dfs_localidade_evitaveis <- reactive(processa_causas(bloco7_evitaveis_fetal, filtros(), pesos = input$input_evitaveis_peso, momentos = input$input_evitaveis_momento, grupos = input$input_evitaveis_grupos, prefixo_coluna = "evitaveis_fetal"))
-    dfs_localidade_principais <- reactive(processa_causas(bloco7_principais_fetal, filtros(), pesos = input$input_principais_peso, momentos = input$input_principais_momento, grupos = input$input_principais_grupos, prefixo_coluna = "principais_fetal"))
+    dfs_localidade_obitos <- reactive({
+      validate(
+        need(
+          !is.null(input$input_num_obitos_peso),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_bloco7(bloco7_fetal_localidade(), input, filtros(), cols_num_obitos_taxa, indicadores_num_obitos_taxa)
+    })
+
+    dfs_localidade_taxa <- reactive({
+      validate(
+        need(
+          !is.null(input$input_taxa_de_mortalidade_peso),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_bloco7(bloco7_fetal_localidade(), input, filtros(), cols_num_obitos_taxa, indicadores_num_obitos_taxa)
+    })
+
+    dfs_localidade_distribuicao_peso <- reactive({
+      validate(
+        need(
+          !is.null(input$input_distribuicao_momento),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_bloco7(bloco7_fetal_localidade(), input, filtros(), cols_distribuicao_peso, indicadores_distribuicao_peso)
+    })
+
+    dfs_localidade_distribuicao_momento <- reactive({
+      validate(
+        need(
+          !is.null(input$input_distribuicao_peso),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_bloco7(bloco7_fetal_localidade(), input, filtros(), cols_distribuicao_momento, indicadores_distribuicao_momento)
+    })
+
+    dfs_localidade_evitaveis <- reactive({
+      validate(
+        need(
+          !is.null(input$input_evitaveis_momento) & !is.null(input$input_evitaveis_peso),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_causas(bloco7_evitaveis_fetal, filtros(), pesos = input$input_evitaveis_peso, momentos = input$input_evitaveis_momento, grupos = input$input_evitaveis_grupos, prefixo_coluna = "evitaveis_fetal")
+    })
+
+    dfs_localidade_principais <- reactive({
+      validate(
+        need(
+          !is.null(input$input_principais_momento) & !is.null(input$input_principais_peso),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_causas(bloco7_principais_fetal, filtros(), pesos = input$input_principais_peso, momentos = input$input_principais_momento, grupos = input$input_principais_grupos, prefixo_coluna = "principais_fetal")
+    })
 
     ### Criando dataframes separados para o resumo
     data7_resumo_localidade_num_obitos <- eventReactive(c(filtros()$pesquisar, input$input_num_obitos_peso, input$input_num_obitos_momento), {
-      dfs_localidade_obitos_taxa()$resumo
+      dfs_localidade_obitos()$resumo
     }, ignoreNULL = FALSE)
 
     data7_resumo_localidade_taxa_de_mortalidade <- eventReactive(c(filtros()$pesquisar, input$input_taxa_de_mortalidade_peso, input$input_taxa_de_mortalidade_momento), {
-      dfs_localidade_obitos_taxa()$resumo
+      dfs_localidade_taxa()$resumo
     }, ignoreNULL = FALSE)
 
     data7_resumo_localidade_distribuicao_peso <- eventReactive(c(filtros()$pesquisar, input$input_distribuicao_momento), {
@@ -948,12 +1001,12 @@ mod_bloco_7_fetal_server <- function(id, filtros){
 
     ### Criando dataframes separados para os gráficos
     data7_num_obitos <- eventReactive(c(filtros()$pesquisar, input$input_num_obitos_peso, input$input_num_obitos_momento), {
-      dfs_localidade_obitos_taxa()$graficos |>
+      dfs_localidade_obitos()$graficos |>
         dplyr::mutate(class = ifelse(class == "Brasil (valor de referência)", "Brasil", class))
     }, ignoreNULL = FALSE)
 
     data7_taxa_de_mortalidade <- eventReactive(c(filtros()$pesquisar, input$input_taxa_de_mortalidade_peso, input$input_taxa_de_mortalidade_momento), {
-      dfs_localidade_obitos_taxa()$graficos
+      dfs_localidade_taxa()$graficos
     }, ignoreNULL = FALSE)
 
     data7_distribuicao_peso <- eventReactive(c(filtros()$pesquisar, input$input_distribuicao_momento), {
@@ -969,19 +1022,73 @@ mod_bloco_7_fetal_server <- function(id, filtros){
 
 
     ## Para a comparação selecionada ------------------------------------------
-    dfs_comp_obitos_taxa <- reactive(processa_bloco7(bloco7_fetal_comp(), input, filtros(), comp = TRUE, cols_num_obitos_taxa, indicadores_num_obitos_taxa))
-    dfs_comp_distribuicao_peso <- reactive(processa_bloco7(bloco7_fetal_comp(), input, filtros(), comp = TRUE, cols_distribuicao_peso, indicadores_distribuicao_peso))
-    dfs_comp_distribuicao_momento <- reactive(processa_bloco7(bloco7_fetal_comp(), input, filtros(), comp = TRUE, cols_distribuicao_momento, indicadores_distribuicao_momento))
-    dfs_comp_evitaveis <- reactive(processa_causas(bloco7_evitaveis_fetal, filtros(), comp = TRUE, pesos = input$input_evitaveis_peso, momentos = input$input_evitaveis_momento, grupos = input$input_evitaveis_grupos, prefixo_coluna = "evitaveis_fetal"))
-    dfs_comp_principais <- reactive(processa_causas(bloco7_principais_fetal, filtros(), comp = TRUE, pesos = input$input_principais_peso, momentos = input$input_principais_momento, grupos = input$input_principais_grupos, prefixo_coluna = "principais_fetal"))
+    dfs_comp_obitos <- reactive({
+      validate(
+        need(
+          !is.null(input$input_num_obitos_peso),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_bloco7(bloco7_fetal_comp(), input, filtros(), comp = TRUE, cols_num_obitos_taxa, indicadores_num_obitos_taxa)
+    })
+
+    dfs_comp_taxa <- reactive({
+      validate(
+        need(
+          !is.null(input$input_taxa_de_mortalidade_peso),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_bloco7(bloco7_fetal_comp(), input, filtros(), comp = TRUE, cols_num_obitos_taxa, indicadores_num_obitos_taxa)
+    })
+
+    dfs_comp_distribuicao_peso <- reactive({
+      validate(
+        need(
+          !is.null(input$input_distribuicao_momento),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_bloco7(bloco7_fetal_comp(), input, filtros(), comp = TRUE, cols_distribuicao_peso, indicadores_distribuicao_peso)
+    })
+
+    dfs_comp_distribuicao_momento <- reactive({
+      validate(
+        need(
+          !is.null(input$input_distribuicao_peso),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_bloco7(bloco7_fetal_comp(), input, filtros(), comp = TRUE, cols_distribuicao_momento, indicadores_distribuicao_momento)
+    })
+
+    dfs_comp_evitaveis <- reactive({
+      validate(
+        need(
+          !is.null(input$input_evitaveis_momento) & !is.null(input$input_evitaveis_peso),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_causas(bloco7_evitaveis_fetal, filtros(), comp = TRUE, pesos = input$input_evitaveis_peso, momentos = input$input_evitaveis_momento, grupos = input$input_evitaveis_grupos, prefixo_coluna = "evitaveis_fetal")
+    })
+
+    dfs_comp_principais <- reactive({
+      validate(
+        need(
+          !is.null(input$input_principais_momento) & !is.null(input$input_principais_peso),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_causas(bloco7_principais_fetal, filtros(), comp = TRUE, pesos = input$input_principais_peso, momentos = input$input_principais_momento, grupos = input$input_principais_grupos, prefixo_coluna = "principais_fetal")
+    })
 
     ### Criando dataframes separados para o resumo
     data7_resumo_comp_num_obitos <- eventReactive(c(filtros()$pesquisar, input$input_num_obitos_peso, input$input_num_obitos_momento), {
-      dfs_comp_obitos_taxa()$resumo
+      dfs_comp_obitos()$resumo
     }, ignoreNULL = FALSE)
 
     data7_resumo_comp_taxa_de_mortalidade <- eventReactive(c(filtros()$pesquisar, input$input_taxa_de_mortalidade_peso, input$input_taxa_de_mortalidade_momento), {
-      dfs_comp_obitos_taxa()$resumo
+      dfs_comp_taxa()$resumo
     }, ignoreNULL = FALSE)
 
     data7_resumo_comp_distribuicao_peso <- eventReactive(c(filtros()$pesquisar, input$input_distribuicao_momento), {
@@ -997,12 +1104,12 @@ mod_bloco_7_fetal_server <- function(id, filtros){
 
     ### Criando dataframes separados para os gráficos
     data7_comp_num_obitos <- eventReactive(c(filtros()$pesquisar, input$input_num_obitos_peso, input$input_num_obitos_momento), {
-      dfs_comp_obitos_taxa()$graficos |>
+      dfs_comp_obitos()$graficos |>
         dplyr::mutate(class = ifelse(class == "Brasil (valor de referência)", "Brasil", class))
     }, ignoreNULL = FALSE)
 
     data7_comp_taxa_de_mortalidade <- eventReactive(c(filtros()$pesquisar, input$input_taxa_de_mortalidade_peso, input$input_taxa_de_mortalidade_momento), {
-      dfs_comp_obitos_taxa()$graficos
+      dfs_comp_taxa()$graficos
     }, ignoreNULL = FALSE)
 
     data7_comp_distribuicao_peso <- eventReactive(c(filtros()$pesquisar, input$input_distribuicao_momento), {
@@ -1019,21 +1126,75 @@ mod_bloco_7_fetal_server <- function(id, filtros){
 
     ## Para a referência ------------------------------------------------------
     ### A função processa_bloco7 retorna dataframes do resumo e dos gráficos
-    dfs_referencia_obitos_taxa <- reactive(processa_bloco7(bloco7_fetal_referencia(), input, filtros(), referencia = TRUE, cols_num_obitos_taxa, indicadores_num_obitos_taxa))
-    dfs_referencia_distribuicao_peso <- reactive(processa_bloco7(bloco7_fetal_referencia(), input, filtros(), referencia = TRUE, cols_distribuicao_peso, indicadores_distribuicao_peso))
-    dfs_referencia_distribuicao_momento <- reactive(processa_bloco7(bloco7_fetal_referencia(), input, filtros(), referencia = TRUE, cols_distribuicao_momento, indicadores_distribuicao_momento))
-    dfs_referencia_evitaveis <- reactive(processa_causas(bloco7_evitaveis_fetal, filtros(), referencia = TRUE, pesos = input$input_evitaveis_peso, momentos = input$input_evitaveis_momento, grupos = input$input_evitaveis_grupos, prefixo_coluna = "evitaveis_fetal"))
-    dfs_referencia_principais <- reactive(processa_causas(bloco7_principais_fetal, filtros(), referencia = TRUE, pesos = input$input_principais_peso, momentos = input$input_principais_momento, grupos = input$input_principais_grupos, prefixo_coluna = "principais_fetal"))
+    dfs_referencia_obitos <- reactive({
+      validate(
+        need(
+          !is.null(input$input_num_obitos_peso),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_bloco7(bloco7_fetal_referencia(), input, filtros(), referencia = TRUE, cols_num_obitos_taxa, indicadores_num_obitos_taxa)
+    })
+
+    dfs_referencia_taxa <- reactive({
+      validate(
+        need(
+          !is.null(input$input_taxa_de_mortalidade_peso),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_bloco7(bloco7_fetal_referencia(), input, filtros(), referencia = TRUE, cols_num_obitos_taxa, indicadores_num_obitos_taxa)
+    })
+
+    dfs_referencia_distribuicao_peso <- reactive({
+      validate(
+        need(
+          !is.null(input$input_distribuicao_momento),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_bloco7(bloco7_fetal_referencia(), input, filtros(), referencia = TRUE, cols_distribuicao_peso, indicadores_distribuicao_peso)
+    })
+
+    dfs_referencia_distribuicao_momento <- reactive({
+      validate(
+        need(
+          !is.null(input$input_distribuicao_peso),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_bloco7(bloco7_fetal_referencia(), input, filtros(), referencia = TRUE, cols_distribuicao_momento, indicadores_distribuicao_momento)
+    })
+
+    dfs_referencia_evitaveis <- reactive({
+      validate(
+        need(
+          !is.null(input$input_evitaveis_momento) & !is.null(input$input_evitaveis_peso),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_causas(bloco7_evitaveis_fetal, filtros(), referencia = TRUE, pesos = input$input_evitaveis_peso, momentos = input$input_evitaveis_momento, grupos = input$input_evitaveis_grupos, prefixo_coluna = "evitaveis_fetal")
+    })
+
+    dfs_referencia_principais <- reactive({
+      validate(
+        need(
+          !is.null(input$input_principais_momento) & !is.null(input$input_principais_peso),
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
+        )
+      )
+      processa_causas(bloco7_principais_fetal, filtros(), referencia = TRUE, pesos = input$input_principais_peso, momentos = input$input_principais_momento, grupos = input$input_principais_grupos, prefixo_coluna = "principais_fetal")
+    })
 
     ### Criando dataframes separados para o resumo
     data7_resumo_referencia_num_obitos <- eventReactive(c(filtros()$pesquisar, input$input_num_obitos_peso, input$input_num_obitos_momento), {
-      dfs_referencia_obitos_taxa()$resumo
+      dfs_referencia_obitos()$resumo
     }, ignoreNULL = FALSE)
 
     referencia_oms <- reactive(ifelse(input$input_taxa_de_mortalidade_momento == "todos" & length(input$input_taxa_de_mortalidade_peso) == 5, TRUE, FALSE))
 
     data7_resumo_referencia_taxa_de_mortalidade <- eventReactive(c(filtros()$pesquisar, input$input_taxa_de_mortalidade_peso, input$input_taxa_de_mortalidade_momento), {
-      dfs_referencia_obitos_taxa()$resumo |>
+      dfs_referencia_taxa()$resumo |>
         dplyr::mutate(taxa_de_mortalidade = ifelse(referencia_oms() == TRUE, 5, taxa_de_mortalidade))
     }, ignoreNULL = FALSE)
 
@@ -1054,7 +1215,7 @@ mod_bloco_7_fetal_server <- function(id, filtros){
     }
 
     data7_referencia_taxa_de_mortalidade <- eventReactive(c(filtros()$pesquisar, input$input_taxa_de_mortalidade_peso, input$input_taxa_de_mortalidade_momento), {
-      dfs_referencia_obitos_taxa()$graficos |>
+      dfs_referencia_taxa()$graficos |>
         dplyr::mutate(taxa_de_mortalidade = ifelse(referencia_oms() == TRUE, 5, taxa_de_mortalidade))
     },
     ignoreNULL = FALSE
@@ -1160,7 +1321,9 @@ mod_bloco_7_fetal_server <- function(id, filtros){
     #### Mostra o botão da tooltip quando a caixa estiver pronta
     observeEvent(output_pronto_num_obitos(), {
       if (output_pronto_num_obitos()) {
-        shinyjs::show(id = "mostrar_botao_num_obitos", anim = TRUE, animType = "fade", time = 0.8)
+        if (!is.null(input$num_obitos_peso)) {
+          shinyjs::show(id = "mostrar_botao_num_obitos", anim = TRUE, animType = "fade", time = 0.8)
+        }
       }
     })
 
@@ -1213,7 +1376,9 @@ mod_bloco_7_fetal_server <- function(id, filtros){
     #### Mostra o botão da tooltip quando a caixa estiver pronta
     observeEvent(output_pronto_taxa_de_mortalidade(), {
       if (output_pronto_taxa_de_mortalidade()) {
-        shinyjs::show(id = "mostrar_botao_taxa_de_mortalidade", anim = TRUE, animType = "fade", time = 0.8)
+        if (!is.null(input$input_taxa_de_mortalidade_peso)) {
+          shinyjs::show(id = "mostrar_botao_taxa_de_mortalidade", anim = TRUE, animType = "fade", time = 0.8)
+        }
       }
     })
 
@@ -1255,7 +1420,9 @@ mod_bloco_7_fetal_server <- function(id, filtros){
     #### Mostra o botão da tooltip quando a caixa estiver pronta
     observeEvent(output_pronto_distribuicao_peso(), {
       if (output_pronto_distribuicao_peso()) {
-        shinyjs::show(id = "mostrar_botao_distribuicao_peso", anim = TRUE, animType = "fade", time = 0.8)
+        if (!is.null(input$input_distribuicao_momento)) {
+          shinyjs::show(id = "mostrar_botao_distribuicao_peso", anim = TRUE, animType = "fade", time = 0.8)
+        }
       }
     })
 
@@ -1297,7 +1464,9 @@ mod_bloco_7_fetal_server <- function(id, filtros){
     #### Mostra o botão da tooltip quando a caixa estiver pronta
     observeEvent(output_pronto_distribuicao_momento(), {
       if (output_pronto_distribuicao_momento()) {
-        shinyjs::show(id = "mostrar_botao_distribuicao_momento", anim = TRUE, animType = "fade", time = 0.8)
+        if (!is.null(input$input_distribuicao_peso)) {
+          shinyjs::show(id = "mostrar_botao_distribuicao_momento", anim = TRUE, animType = "fade", time = 0.8)
+        }
       }
     })
 
@@ -1345,7 +1514,9 @@ mod_bloco_7_fetal_server <- function(id, filtros){
     #### Mostra o botão da tooltip quando a caixa estiver pronta
     observeEvent(output_pronto_evitaveis(), {
       if (output_pronto_evitaveis()) {
-        shinyjs::show(id = "mostrar_botao_evitaveis", anim = TRUE, animType = "fade", time = 0.8)
+        if (!is.null(input$input_evitavais_momento) & !is.null(input$input_evitavais_peso)) {
+          shinyjs::show(id = "mostrar_botao_evitaveis", anim = TRUE, animType = "fade", time = 0.8)
+        }
       }
     })
 
@@ -1386,7 +1557,9 @@ mod_bloco_7_fetal_server <- function(id, filtros){
     #### Mostra o botão da tooltip quando a caixa estiver pronta
     observeEvent(output_pronto_principais(), {
       if (output_pronto_principais()) {
-        shinyjs::show(id = "mostrar_botao_principais", anim = TRUE, animType = "fade", time = 0.8)
+        if (!is.null(input$input_principais_momento) & !is.null(input$input_principais_peso)) {
+          shinyjs::show(id = "mostrar_botao_principais", anim = TRUE, animType = "fade", time = 0.8)
+        }
       }
     })
 
@@ -1644,7 +1817,7 @@ mod_bloco_7_fetal_server <- function(id, filtros){
       validate(
         need(
           nrow(data7_principais()) != 0,
-          "Não existem ocorrências de óbitos fetais por grupos de causas para a localidade, período e grupos CID-10 selecionados."
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
         )
       )
       dplyr::full_join(data7_principais(), data7_referencia_principais())
@@ -1654,11 +1827,13 @@ mod_bloco_7_fetal_server <- function(id, filtros){
       validate(
         need(
           nrow(data7_comp_principais()) != 0,
-          "Não existem ocorrências de óbitos fetais por grupos de causas para a localidade de comparação, período e grupos CID-10 selecionados."
+          "⚠ Não existem ocorrências de óbitos fetais para os filtros selecionados."
         )
       )
       dplyr::full_join(data7_comp_principais(), data7_referencia_principais())
     })
+
+    observe(print(data7_principais_completo()))
 
     output$plot_causas_principais <- highcharter::renderHighchart({
       if (filtros()$comparar == "Não") {
@@ -1669,7 +1844,7 @@ mod_bloco_7_fetal_server <- function(id, filtros){
             type = "column",
             showInLegend = TRUE,
             tooltip = list(
-              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
+              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> &thinsp;&emsp;Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
             )
           )
       } else {
@@ -1680,7 +1855,7 @@ mod_bloco_7_fetal_server <- function(id, filtros){
             type = "column",
             showInLegend = TRUE,
             tooltip = list(
-              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
+              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> &thinsp;&emsp;Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
             ),
             stack = 0
           ) |>
@@ -1690,7 +1865,7 @@ mod_bloco_7_fetal_server <- function(id, filtros){
             type = "column",
             showInLegend = FALSE,
             tooltip = list(
-              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
+              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> &thinsp;&emsp;Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
             ),
             stack = 1
           )
@@ -1729,6 +1904,7 @@ mod_bloco_7_fetal_server <- function(id, filtros){
       dplyr::full_join(data7_comp_evitaveis(), data7_referencia_evitaveis())
     })
 
+
     output$plot_causas_evitaveis <- highcharter::renderHighchart({
       if (filtros()$comparar == "Não") {
         grafico_base <- highcharter::highchart() |>
@@ -1738,7 +1914,7 @@ mod_bloco_7_fetal_server <- function(id, filtros){
             type = "column",
             showInLegend = TRUE,
             tooltip = list(
-              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
+              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> &thinsp;&emsp;Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
             )
           )
       } else {
@@ -1749,7 +1925,7 @@ mod_bloco_7_fetal_server <- function(id, filtros){
             type = "column",
             showInLegend = TRUE,
             tooltip = list(
-              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
+              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> &thinsp;&emsp;Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
             ),
             stack = 0
           ) |>
@@ -1759,7 +1935,7 @@ mod_bloco_7_fetal_server <- function(id, filtros){
             type = "column",
             showInLegend = FALSE,
             tooltip = list(
-              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
+              pointFormat = "<span style = 'color: {series.color}'> &#9679 </span> {series.name} <b>({point.class})</b>: <b> {point.y}% </b> <br> &thinsp;&emsp;Média nacional: <b> {point.br_porc_obitos:,f}% </b>"
             ),
             stack = 1
           )

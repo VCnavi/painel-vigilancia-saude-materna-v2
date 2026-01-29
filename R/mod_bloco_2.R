@@ -202,25 +202,21 @@ mod_bloco_2_ui <- function(id) {
                   )
                 )
               ),
-              hr(),
-              fluidRow(
-                column(
-                  width = 12,
-                  selectizeInput(
-                    inputId = ns("tipo_taxa_aborto"),
-                    label = "Grupo de mulheres",
-                    options = list(
-                      placeholder = "Selecione o grupo de mulheres"
-                    ),
-                    choices = c(
-                      "Todas" = "geral",
-                      "Usuárias exclusivas do SUS" = "sus",
-                      "Beneficiárias de planos de saúde privados" = "ans"
-                    ),
-                    width = "100%"
-                  )
+              div(
+                style = "display: flex; justify-content: center;",
+                shinyWidgets::prettyRadioButtons(
+                  inputId = ns("tipo_taxa_aborto"),
+                  label = NULL,
+                  inline = TRUE,
+                  choices = c(
+                    "No SUS" = "sus",
+                    "Na saúde suplementar" = "ans"
+                  ),
+                  icon = icon("check", style = "background-color: #007bff;"),
+                  animation = "rotate"
                 )
               ),
+              hr(style = "margin-top: 0;"),
               shinycssloaders::withSpinner(highcharter::highchartOutput(
                 ns("plot3"),
                 height = 380
@@ -253,25 +249,21 @@ mod_bloco_2_ui <- function(id) {
                   )
                 )
               ),
-              hr(),
-              fluidRow(
-                column(
-                  width = 12,
-                  selectizeInput(
-                    inputId = ns("tipo_razao_aborto"),
-                    label = "Grupo de mulheres",
-                    options = list(
-                      placeholder = "Selecione o grupo de mulheres"
-                    ),
-                    choices = c(
-                      "Todas" = "geral",
-                      "Usuárias exclusivas do SUS" = "sus",
-                      "Beneficiárias de planos de saúde privados" = "ans"
-                    ),
-                    width = "100%"
-                  )
+              div(
+                style = "display: flex; justify-content: center;",
+                shinyWidgets::prettyRadioButtons(
+                  inputId = ns("tipo_razao_aborto"),
+                  label = NULL,
+                  inline = TRUE,
+                  choices = c(
+                    "No SUS" = "sus",
+                    "Na saúde suplementar" = "ans"
+                  ),
+                  icon = icon("check", style = "background-color: #007bff;"),
+                  animation = "rotate"
                 )
               ),
+              hr(),
               shinycssloaders::withSpinner(highcharter::highchartOutput(
                 ns("plot4"),
                 height = 380

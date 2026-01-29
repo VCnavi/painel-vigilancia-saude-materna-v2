@@ -181,7 +181,7 @@ cria_grupo_evitavel <- function(data, cids, prefixo, filtro_obitoparto = NULL, i
       causabas2 = substr(causabas, 1, 3),
       faixa_de_peso = dplyr::case_when(
         is.na(peso) ~ "sem_informacao",
-        peso < 1000 ~ "menor_1000",
+        peso < 1000 ~ "menos_1000",
         peso < 1500 ~ "1000_a_1499",
         peso < 2500 ~ "1500_a_2499",
         peso >= 2500 ~ "2500_mais"
@@ -322,7 +322,7 @@ cria_grupo_causa <- function(data, lista_cids, prefixo, filtro_obitoparto = NULL
       causabas2 = substr(causabas, 1, 3),
       faixa_de_peso = dplyr::case_when(
         is.na(peso) ~ "sem_informacao",
-        peso < 1000 ~ "menor_1000",
+        peso < 1000 ~ "menos_1000",
         peso < 1500 ~ "1000_a_1499",
         peso < 2500 ~ "1500_a_2499",
         peso >= 2500 ~ "2500_mais"

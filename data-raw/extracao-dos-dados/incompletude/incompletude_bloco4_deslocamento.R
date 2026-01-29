@@ -21,7 +21,7 @@ df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = lengt
 df_sinasc_aux <- fetch_datasus(
   year_start = 2012,
   year_end = 2023,
-  vars = c("CODMUNRES", "CODMUNNASC", "DTNASC", "IDADEMAE", "CODESTAB"),
+  vars = c("CODMUNRES", "CODMUNNASC", "DTNASC", "LOCNASC", "IDADEMAE", "CODESTAB"),
   information_system = "SINASC"
 )
 
@@ -37,10 +37,12 @@ df_sinasc <- df_sinasc_aux |>
     IDADEMAE = as.numeric(IDADEMAE)
   ) |>
   filter(
+    LOCNASC == "1",
     IDADEMAE >= 10 & IDADEMAE <= 49
   ) |>
   clean_names()
 
+write.csv(df_sinasc, "df_sinasc_2012_2023.csv", row.names = FALSE)
 
 # Baixando os dados do CNES -----------------------------------------------
 ## Criando um vetor com as siglas de todos os estados do Brasil
@@ -112,19 +114,19 @@ df_sinasc <- fread("data-raw/extracao-dos-dados/incompletude/databases_auxiliare
 df_incompletude <- df_sinasc |>
   mutate(
     dn_hospital_id_fertil = 1,
-    dn_hosp_id_fertil_cnes_preenchido = ifelse(is.na(codestab), 0, 1),
-    dn_hosp_id_fertil_cnes_valido = ifelse(
-      is.na(codestab) |
-        !(paste(codmunnasc, codestab, ano, mes) %in% paste(df_cnes_st$codufmun, df_cnes_st$cnes, df_cnes_st$ano, df_cnes_st$mes)),
-      0,
-      1
-    )
+    dn_hosp_id_fertil_cnes_preenchido = ifelse(is.na(codestab), 0, 1)#,
+    # dn_hosp_id_fertil_cnes_valido = ifelse(
+    #   is.na(codestab) |
+    #     !(paste(codmunnasc, codestab, ano, mes) %in% paste(df_cnes_st$codufmun, df_cnes_st$cnes, df_cnes_st$ano, df_cnes_st$mes)),
+    #   0,
+    #   1
+    # )
   ) |>
   group_by(ano, codmunres) |>
   summarise(
     dn_hospital_id_fertil = sum(dn_hospital_id_fertil),
-    dn_hosp_id_fertil_cnes_preenchido = sum(dn_hosp_id_fertil_cnes_preenchido),
-    dn_hosp_id_fertil_cnes_valido = sum(dn_hosp_id_fertil_cnes_valido)
+    dn_hosp_id_fertil_cnes_preenchido = sum(dn_hosp_id_fertil_cnes_preenchido)#,
+    #dn_hosp_id_fertil_cnes_valido = sum(dn_hosp_id_fertil_cnes_valido)
   ) |>
   ungroup() |>
   right_join(df_aux_municipios) |>
