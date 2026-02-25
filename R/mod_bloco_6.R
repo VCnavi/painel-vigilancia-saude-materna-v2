@@ -1429,7 +1429,7 @@ mod_bloco_6_server <- function(id, filtros){
     data6_rmm_corrigida <- reactive({
       if (filtros()$nivel %in% c("estadual", "regional", "nacional")) {
         dplyr::full_join(data6(), data6_rmm_corrigida_aux(), by = "ano") |>
-          dplyr::mutate(rmm = ifelse(ano <= 2022, RMM, rmm))
+          dplyr::mutate(rmm = ifelse(ano <= 2024, RMM, rmm))
       } else {
         data6()
       }
@@ -1489,7 +1489,7 @@ mod_bloco_6_server <- function(id, filtros){
     data6_comp_rmm_corrigida <- reactive({
       if (filtros()$nivel2 %in% c("estadual", "regional", "nacional")) {
         dplyr::full_join(data6_comp(), data6_comp_rmm_corrigida_aux(), by = "ano") |>
-          dplyr::mutate(rmm = ifelse(ano <= 2022, RMM, rmm))
+          dplyr::mutate(rmm = ifelse(ano <= 2024, RMM, rmm))
       } else{
         data6_comp()
       }

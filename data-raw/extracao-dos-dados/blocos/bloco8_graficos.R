@@ -11,7 +11,7 @@ codigos_municipios <- read.csv("data-raw/extracao-dos-dados/blocos/databases_aux
   pull(codmunres)
 
 # Criando um data.frame auxiliar que possui uma linha para cada combinação de município e ano
-df_aux_municipios <- data.frame(codmunres = rep(as.character(codigos_municipios), each = length(2020:2024)), ano = 2020:2024)
+df_aux_municipios <- data.frame(codmunres = rep(as.character(codigos_municipios), each = length(2023:2025)), ano = 2023:2025)
 
 # Criando o data.frame que irá receber todos os dados dos gráficos do bloco 8
 df_bloco8_graficos <- df_aux_municipios
@@ -20,8 +20,8 @@ df_bloco8_graficos <- df_aux_municipios
 # Garbage codes para óbitos maternos --------------------------------------
 ## Baixando os dados do SIM-DOMAT de 2012 a 2022
 df_sim_domat_aux1 <- fetch_datasus(
-  year_start = 2020,
-  year_end = 2023,
+  year_start = 2023,
+  year_end = 2024,
   information_system = "SIM-DOMAT"
 ) |>
   clean_names()
@@ -31,7 +31,7 @@ df_sim_domat_aux1 <- df_sim_domat_aux1 |> select(-c(estabdescr, nudiasobin,
 
 options(timeout = 600)
 
-sim_2024 <- fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/DO24OPEN.csv")
+sim_2024 <- fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/csv/DO25OPEN_csv.zip")
 
  sim_mat2024 <- sim_2024 |>
    filter(
@@ -161,8 +161,8 @@ sim_2024 <- fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/DO24
 # Garbage codes para óbitos fetais ----------------------------------------
 ## Baixando os dados do SIM-DOFET de 2012 a 2022
 df_sim_dofet_aux1 <- fetch_datasus(
-  year_start = 2020,
-  year_end = 2023,
+  year_start = 2023,
+  year_end = 2024,
   information_system = "SIM-DOFET"
 ) |>
   clean_names()
@@ -342,8 +342,8 @@ rm(df_fetais_garbage)
 
 # Garbage codes para óbitos neonatais -------------------------------------
 df_sim_doinf_aux1 <- fetch_datasus(
-  year_start = 2020,
-  year_end = 2023,
+  year_start = 2023,
+  year_end = 2024,
   information_system = "SIM-DOINF",
 ) |>
   clean_names()
@@ -687,7 +687,7 @@ df_bloco8_graficos <- left_join(df_bloco8_graficos, df_neonatais_totais_precoce)
  df_bloco8_graficos_2023 <- df_bloco8_graficos
 
  df_bloco8_graficos_antigo <- read_csv("data-raw/csv/indicadores_bloco8_graficos_garbage_code_2012-2024.csv") |>
-   filter(ano <= 2019) #|>
+   filter(ano <= 2022) #|>
    #select(all_of(names(df_bloco8_graficos_2023)))
 
 
@@ -695,7 +695,7 @@ df_bloco8_graficos <- left_join(df_bloco8_graficos, df_neonatais_totais_precoce)
  df_bloco8_graficos_total <- full_join(df_bloco8_graficos_antigo, df_bloco8_graficos_2023)
  df_bloco8_graficos_total[is.na(df_bloco8_graficos_total)] <- 0
 
- write.csv(df_bloco8_graficos_total, "data-raw/csv/indicadores_bloco8_graficos_garbage_code_2012-2024.csv", row.names = FALSE)
+ write.csv(df_bloco8_graficos_total, "data-raw/csv/indicadores_bloco8_graficos_garbage_code_2012-2025.csv", row.names = FALSE)
 
 
 
