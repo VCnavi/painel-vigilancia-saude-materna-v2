@@ -14,34 +14,45 @@ library(microdatasus)
 ## Criando um objeto que recebe os códigos dos municípios que utilizamos no painel
 codigos_municipios <- read.csv(
   "data-raw/extracao-dos-dados/blocos/databases_auxiliares/tabela_aux_municipios.csv"
-) |>
+  ) |>
   pull(codmunres) |>
   as.character()
 
 ## Criando um data.frame auxiliar que possui uma linha para cada combinação de município e ano
 df_aux_municipios <- data.frame(
-  codmunres = rep(codigos_municipios, each = length(2012:2024)),
-  ano = 2012:2024
-) |>
+  codmunres = rep(codigos_municipios, each = length(2012:2025)),
+  ano = 2012:2025
+  ) |>
   mutate_if(is.character, as.numeric)
 
 
 # Para os indicadores provenientes do SINASC ------------------------------
-## Baixando os dados consolidados do SINASC de 2012 a 2022 e selecionando as variáveis de interesse
+## Baixando os dados consolidados do SINASC de 2012 a 2024 e selecionando as variáveis de interesse
 df_sinasc_consolidados <- fetch_datasus(
   year_start = 2012,
-  year_end = 2023,
+  year_end = 2024,
   vars = c("CODMUNRES", "DTNASC", "IDADEMAE", "RACACORMAE", "ESCMAE"),
   information_system = "SINASC"
-) |>
+  ) |>
   mutate_if(is.character, as.numeric)
 
-## Baixando os dados preliminares do SINASC de 2024 e selecionando as variáveis de interesse
-df_sinasc_preliminares <- fread(
-  "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2024.csv",
-  sep = ";"
-) |>
-  select("CODMUNRES", "DTNASC", "IDADEMAE", "RACACORMAE", "ESCMAE")
+## Baixando os dados preliminares do SINASC de 2025 e selecionando as variáveis de interesse
+temp_zip <- tempfile(fileext = ".zip")
+temp_dir <- tempdir()
+
+download.file("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2025_csv.zip",
+              temp_zip, mode = "wb")
+
+files <- unzip(temp_zip, exdir = temp_dir)
+
+df_sinasc_preliminares <- fread(files[1], sep = ";") |>
+  select(CODMUNRES, DTNASC, IDADEMAE, RACACORMAE, ESCMAE)
+
+# df_sinasc_preliminares <- fread(
+#   "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2024.csv",
+#   sep = ";") |>
+#   select("CODMUNRES", "DTNASC", "IDADEMAE", "RACACORMAE", "ESCMAE")
+
 
 ## Juntando os dados consolidados com os dados preliminares
 df_sinasc <- full_join(df_sinasc_consolidados, df_sinasc_preliminares) |>
@@ -92,7 +103,7 @@ source("data-raw/extracao-dos-dados/blocos/funcoes_auxiliares.R")
 
 ## População feminina de 10 a 49 anos com plano de saúde -------------------
 ### Baixando os dados de estimativas da população feminina de 10 a 49 anos
-df_est_pop <- est_pop_tabnet(periodo = 12:24, idade_min = 10, idade_max = 49)
+df_est_pop <- est_pop_tabnet(periodo = 12:25, idade_min = 10, idade_max = 49)
 
 ### Verificando se existem NAs
 if (any(is.na(df_est_pop))) {
@@ -100,7 +111,6 @@ if (any(is.na(df_est_pop))) {
 } else {
   print("não existem NAs")
 }
-
 
 ### Baixando os dados de mulheres de 10 a 49 anos beneficíarias de planos de saúde
 #### Tive que separar em dois porque estava dando erro baixando o período inteiro
@@ -116,7 +126,7 @@ df_beneficiarias_aux1 <- pop_com_plano_saude_tabnet(
     "45 a 49 anos"
   ),
   periodo = 2012:2016
-) |>
+  ) |>
   select(!municipio)
 
 df_beneficiarias_aux2 <- pop_com_plano_saude_tabnet(
@@ -130,8 +140,8 @@ df_beneficiarias_aux2 <- pop_com_plano_saude_tabnet(
     "40 a 44 anos",
     "45 a 49 anos"
   ),
-  periodo = 2017:2024
-) |>
+  periodo = 2017:2025
+  ) |>
   select(!municipio)
 
 df_beneficiarias_aux <- full_join(
@@ -194,14 +204,14 @@ df_cob_suplementar <- df_beneficiarias_pop |>
   mutate(
     q1 = round(
       quantile(
-        cob_suplementar[which(cob_suplementar < 1 & ano %in% 2012:2024)],
+        cob_suplementar[which(cob_suplementar < 1 & ano %in% 2012:2025)],
         0.25
       ),
       3
     ),
     q3 = round(
       quantile(
-        cob_suplementar[which(cob_suplementar < 1 & ano %in% 2012:2024)],
+        cob_suplementar[which(cob_suplementar < 1 & ano %in% 2012:2025)],
         0.75
       ),
       3
@@ -221,7 +231,7 @@ df_cob_suplementar <- df_beneficiarias_pop |>
       outlier == 0,
       cob_suplementar,
       round(
-        median(cob_suplementar[which(outlier == 0 & ano %in% 2012:2024)]),
+        median(cob_suplementar[which(outlier == 0 & ano %in% 2012:2025)]),
         3
       )
     ),
@@ -244,8 +254,7 @@ df_bloco1_tabnet <- df_aux_municipios |>
 
 ### Substituindo os NA's da coluna 'pop_fem_10_49_com_plano_saude' por 0 (gerados após o left_join)
 df_bloco1_tabnet$pop_fem_10_49_com_plano_saude[is.na(
-  df_bloco1_tabnet$pop_fem_10_49_com_plano_saude
-)] <- 0
+  df_bloco1_tabnet$pop_fem_10_49_com_plano_saude)] <- 0
 
 
 # Para o indicador de cobertura da AB -------------------------------------
@@ -253,7 +262,7 @@ df_bloco1_tabnet$pop_fem_10_49_com_plano_saude[is.na(
 ### Para os anos de 2012 até 2020
 historico_ab_municipios <- read_delim(
   "data-raw/extracao-dos-dados/blocos/databases_auxiliares/Historico_AB_MUNICIPIOS_2007_202012.csv"
-) |>
+  ) |>
   janitor::clean_names() |>
   mutate(
     ano = as.numeric(substr(nu_competencia, 1, 4)),
@@ -270,7 +279,7 @@ historico_ab_municipios <- read_delim(
 ### Para os anos de 2021 até set/2023
 cobertura_potencial_aps_municipio1 <- read.xlsx(
   "data-raw/extracao-dos-dados/blocos/databases_auxiliares/cobertura_potencial_aps_municipio3.xlsx"
-) |>
+  ) |>
   janitor::clean_names() |>
   select(
     comp_cnes,
@@ -293,7 +302,7 @@ cobertura_potencial_aps_municipio1 <- read.xlsx(
 ### Para os meses de out/2023 até abr/2024
 cobertura_potencial_aps_municipio2 <- readxl::read_xls(
   "data-raw/extracao-dos-dados/blocos/databases_auxiliares/cobertura_potencial_aps_municipio4.xls"
-) |>
+  ) |>
   janitor::clean_names() |>
   select(
     competencia_cnes,
@@ -313,17 +322,37 @@ cobertura_potencial_aps_municipio2 <- readxl::read_xls(
   ) |>
   select(ano, codmunres, qt_cobertura_ab, qt_populacao)
 
-## Juntando os dados de 2021 até abr/2024
+### Para os meses de mai/2024 até dez/2025
+cobertura_potencial_aps_municipio3 <- readxl::read_xlsx(
+  "data-raw/extracao-dos-dados/blocos/databases_auxiliares/cobertura_potencial_aps_municipio5.xls"
+  ) |>
+  select(codmunres = Município,
+         ano = "Comp. CNES",
+         qt_populacao = População,
+         qt_cobertura_ab = "Qt. capacidade da equipe"
+  ) |>
+  mutate(
+    ano = as.numeric(substr(ano, 4, 7))
+  ) |>
+  select(ano, codmunres, qt_cobertura_ab, qt_populacao)
+
+## Dados de cobertura em:
+## https://relatorioaps.saude.gov.br/cobertura/aps
+
+################################################################################
+
+## Juntando os dados de 2021 até dez/2025
 cobertura_potencial_aps_municipio <- rbind(
   cobertura_potencial_aps_municipio1,
-  cobertura_potencial_aps_municipio2
-)
+  cobertura_potencial_aps_municipio2,
+  cobertura_potencial_aps_municipio3
+  )
 
 ## Juntando todas as bases
 dados_ab_municipios <- rbind(
   historico_ab_municipios,
   cobertura_potencial_aps_municipio
-)
+  )
 
 ## Calculando a média anual dos valores de qt_cobertura_ab e qt_populacao
 dados_ab_municipios <- dados_ab_municipios |>
@@ -337,13 +366,13 @@ dados_ab_municipios <- dados_ab_municipios |>
 dados_ab_municipios$qt_cobertura_ab <- pmin(
   dados_ab_municipios$qt_cobertura_ab,
   dados_ab_municipios$qt_populacao
-)
+  )
 
 ### Fazendo um left_join com a base auxiliar de municípios
 df_cobertura_ab <- left_join(
   df_aux_municipios,
   dados_ab_municipios |> mutate(codmunres = as.numeric(codmunres))
-)
+  )
 
 ### Substituindo os NA's da coluna 'qt_cobertura_ab' por 0 (gerados após o left_join)
 df_cobertura_ab$qt_cobertura_ab[is.na(df_cobertura_ab$qt_cobertura_ab)] <- 0
@@ -363,49 +392,60 @@ df_bloco1 <- df_bloco1_sinasc |>
       )
   )
 
-
 # Verificando se os dados novos e antigos estão batendo -------------------
 ## Lendo o arquivo com os dados de 2012 a 2020, que utilizamos no painel original
-df_bloco1_antigo <- read.csv(
-  "data-raw/extracao-dos-dados/blocos/databases_auxiliares/indicadores_bloco1_socioeconomicos_2012-2020.csv"
-) |>
-  clean_names()
+# df_bloco1_antigo <- read.csv(
+#   "data-raw/csv/indicadores_bloco1_socioeconomicos_2012-2024.csv"
+#   ) |>
+#   clean_names()
+#
+# sum(df_bloco1 |> filter(ano <= 2020) |> pull(total_de_nascidos_vivos)) -
+#   sum(df_bloco1_antigo$total_de_nascidos_vivos)
+#
+# sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_menor_que_20_anos)) -
+#   sum(df_bloco1_antigo$nvm_menor_que_20_anos)
+#
+# sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_entre_20_e_34_anos)) -
+#   sum(df_bloco1_antigo$nvm_entre_20_e_34_anos)
+#
+# sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_maior_que_34_anos)) -
+#   sum(df_bloco1_antigo$nvm_maior_que_34_anos)
+#
+# sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_com_cor_da_pele_branca)) -
+#   sum(df_bloco1_antigo$nvm_com_cor_da_pele_branca)
+#
+# sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_com_cor_da_pele_preta)) -
+#   sum(df_bloco1_antigo$nvm_com_cor_da_pele_preta)
+#
+# sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_com_cor_da_pele_parda)) -
+#   sum(df_bloco1_antigo$nvm_com_cor_da_pele_parda)
+#
+# sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_com_cor_da_pele_amarela)) -
+#   sum(df_bloco1_antigo$nvm_com_cor_da_pele_amarela)
+#
+# sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_indigenas)) -
+#   sum(df_bloco1_antigo$nvm_indigenas)
+#
+# sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_com_escolaridade_ate_3)) -
+#   sum(df_bloco1_antigo$nvm_com_escolaridade_ate_3)
+#
+# sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_com_escolaridade_de_4_a_7)) -
+#   sum(df_bloco1_antigo$nvm_com_escolaridade_de_4_a_7)
+#
+# sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_com_escolaridade_de_8_a_11)) -
+#   sum(df_bloco1_antigo$nvm_com_escolaridade_de_8_a_11)
+#
+# sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_com_escolaridade_acima_de_11)) -
+#   sum(df_bloco1_antigo$nvm_com_escolaridade_acima_de_11)
+#
+# sum(df_bloco1 |> filter(ano <= 2020) |> pull(populacao_feminina_10_a_49)) -
+#   sum(df_bloco1_antigo$populacao_feminina_10_a_49, na.rm = T)
 
-sum(df_bloco1 |> filter(ano <= 2020) |> pull(total_de_nascidos_vivos)) -
-  sum(df_bloco1_antigo$total_de_nascidos_vivos)
-sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_menor_que_20_anos)) -
-  sum(df_bloco1_antigo$nvm_menor_que_20_anos)
-sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_entre_20_e_34_anos)) -
-  sum(df_bloco1_antigo$nvm_entre_20_e_34_anos)
-sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_maior_que_34_anos)) -
-  sum(df_bloco1_antigo$nvm_maior_que_34_anos)
-sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_com_cor_da_pele_branca)) -
-  sum(df_bloco1_antigo$nvm_com_cor_da_pele_branca)
-sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_com_cor_da_pele_preta)) -
-  sum(df_bloco1_antigo$nvm_com_cor_da_pele_preta)
-sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_com_cor_da_pele_parda)) -
-  sum(df_bloco1_antigo$nvm_com_cor_da_pele_parda)
-sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_com_cor_da_pele_amarela)) -
-  sum(df_bloco1_antigo$nvm_com_cor_da_pele_amarela)
-sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_indigenas)) -
-  sum(df_bloco1_antigo$nvm_indigenas)
-sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_com_escolaridade_ate_3)) -
-  sum(df_bloco1_antigo$nvm_com_escolaridade_ate_3)
-sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_com_escolaridade_de_4_a_7)) -
-  sum(df_bloco1_antigo$nvm_com_escolaridade_de_4_a_7)
-sum(df_bloco1 |> filter(ano <= 2020) |> pull(nvm_com_escolaridade_de_8_a_11)) -
-  sum(df_bloco1_antigo$nvm_com_escolaridade_de_8_a_11)
-sum(
-  df_bloco1 |> filter(ano <= 2020) |> pull(nvm_com_escolaridade_acima_de_11)
-) -
-  sum(df_bloco1_antigo$nvm_com_escolaridade_acima_de_11)
-sum(df_bloco1 |> filter(ano <= 2020) |> pull(populacao_feminina_10_a_49)) -
-  sum(df_bloco1_antigo$populacao_feminina_10_a_49, na.rm = T) # As estimativas foram atualizadas com o censo de 2022
-
+# As estimativas foram atualizadas com o censo de 2022
 
 # Salvando a base de dados completa na pasta data-raw/csv -----------------
 write.csv(
   df_bloco1,
-  "data-raw/csv/indicadores_bloco1_socioeconomicos_2012-2024.csv",
+  "data-raw/csv/indicadores_bloco1_socioeconomicos_2012-2025.csv",
   row.names = FALSE
 )
