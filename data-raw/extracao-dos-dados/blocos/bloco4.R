@@ -8,7 +8,7 @@ codigos_municipios <- read.csv("data-raw/extracao-dos-dados/blocos/databases_aux
   pull(codmunres)
 
 # Criando um data.frame auxiliar que possui uma linha para cada combinação de município e ano
-df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2012:2024)), ano = 2012:2024)
+df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2012:2025)), ano = 2012:2025)
 
 # Criando o data.frame que irá receber todos os dados do bloco 4
 df_bloco4 <- data.frame()
@@ -18,7 +18,7 @@ df_bloco4 <- data.frame()
 df_list <- list()
 
 # Baixar os dados ano a ano
-for (ano in c(2012,2014:2023)) {
+for (ano in c(2012:2024)) {
   df_ano <- microdatasus::fetch_datasus(year_start = ano, year_end = ano,
                                         information_system = "SINASC",
                                         vars = c("CODMUNRES", "TPROBSON", "PARTO"))
@@ -31,12 +31,12 @@ for (ano in c(2012,2014:2023)) {
 }
 
 # TPROBSON não é definada para o ano de 2013 então a forma de baixar vai ser diferente
-df_ano <- microdatasus::fetch_datasus(year_start = 2013, year_end = 2013,
-                                      information_system = "SINASC",
-                                      vars = c("CODMUNRES", "PARTO"))
-df_ano$TPROBSON <- rep("NA", nrow(df_ano))
-df_ano$ano <- 2013
-df_list[[2]] <- df_ano
+#df_ano <- microdatasus::fetch_datasus(year_start = 2013, year_end = 2013,
+#                                      information_system = "SINASC",
+#                                      vars = c("CODMUNRES", "PARTO"))
+#df_ano$TPROBSON <- rep("NA", nrow(df_ano))
+#df_ano$ano <- 2013
+#df_list[[2]] <- df_ano
 
 # Juntar os dataframes da lista em um único dataframe
 df <- bind_rows(df_list)
@@ -44,17 +44,17 @@ rm(df_list)
 
 df$TPROBSON <- as.numeric(df$TPROBSON)
 
-# Dados 2024 ainda não estão no microdatasus
+# Dados 2025 ainda não estão no microdatasus
 options(timeout=99999)
 
-sinasc24 <- fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2024.csv", sep = ";")
-sinasc24 <- sinasc24 |>
-  mutate(ano = 2024) |>
+sinasc25 <- fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2025_csv.zip", sep = ";")
+sinasc25 <- sinasc25 |>
+  mutate(ano = 2025) |>
   select(CODMUNRES, TPROBSON, PARTO, ano)
 
-df_aux <- rbind(df, sinasc23, sinasc24)
+df_aux <- rbind(df, sinasc25)
 
-rm(df, df_ano, sinasc23, sinasc24, codigos_municipios)
+rm(df, df_ano, sinasc25, codigos_municipios)
 
 ################################################################################
 ### Total de nascidos vivos
@@ -350,6 +350,6 @@ df_bloco4 <- left_join(df_bloco4, df)
 df_bloco4$total_cesariana_grupo_robson_10[is.na(df_bloco4$total_cesariana_grupo_robson_10)] <- 0
 
 # Salvando a base de dados completa na pasta data-raw/csv -----------------
-write.csv(df_bloco4, "data-raw/csv/indicadores_bloco4_assistencia_ao_parto_2012-2024.csv", row.names = FALSE)
+write.csv(df_bloco4, "data-raw/csv/indicadores_bloco4_assistencia_ao_parto_2012-2025.csv", row.names = FALSE)
 
 

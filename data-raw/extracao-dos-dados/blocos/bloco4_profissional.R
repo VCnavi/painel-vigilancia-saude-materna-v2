@@ -11,7 +11,7 @@ library(janitor)
 
 ## tpnascassi foi criada em 2013
 
-df <- microdatasus::fetch_datasus(year_start = 2013, year_end = 2023,
+df <- microdatasus::fetch_datasus(year_start = 2024, year_end = 2024,
                                       information_system = "SINASC",
                                       vars = c("CODMUNRES",
                                                "DTNASC",
@@ -26,7 +26,7 @@ df <- microdatasus::fetch_datasus(year_start = 2013, year_end = 2023,
 # Baixando os dados preliminares do SINASC e selecionando as variáveis ---------
 options(timeout=99999)
 
-df_2024 <- data.table::fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2024.csv", sep = ";") |>
+df_2025 <- data.table::fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2025_csv.zip", sep = ";") |>
   select(CODMUNRES, DTNASC, TPNASCASSI, LOCNASC, PARTO) |>
   mutate(CODMUNRES = as.character(CODMUNRES),
          DTNASC = as.character(DTNASC),
@@ -35,7 +35,7 @@ df_2024 <- data.table::fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.
          PARTO = as.character(PARTO)
          )
 
-df <- rbind(df, df_2024) |> clean_names()
+df <- rbind(df, df_2025) |> clean_names()
 
 #rm(df_2024)
 
@@ -46,7 +46,7 @@ codigos_municipios <- read.csv("data-raw/csv//tabela_aux_municipios.csv") |>
   as.character()
 
 ## Criando um data.frame auxiliar que possui uma linha para cada combinação de município e ano
-df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2013:2024)), ano = 2013:2024)
+df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2024:2025)), ano = 2024:2025)
 
 
 # tpnascassi Nascimento foi assistido por? Valores: 1– Médico; 2– Enfermagem ou Obstetriz; 3–Parteira; 4– Outros; 9– Ignorado

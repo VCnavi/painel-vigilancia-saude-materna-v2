@@ -1,5 +1,5 @@
 # Criando a função que baixa os dados de estimativas populacionais por município, idade e sexo a partir de um endereço FTP
-est_pop_tabnet <- function(periodo = 12:24, sexo = 2, idade_min = 10, idade_max = 49, temp_dir = "data-raw/extracao-dos-dados/blocos/databases_auxiliares/dados_populacao") {
+est_pop_tabnet <- function(periodo = 12:25, sexo = 2, idade_min = 10, idade_max = 49, temp_dir = "data-raw/extracao-dos-dados/blocos/databases_auxiliares/dados_populacao") {
   library(dplyr)
   library(foreign)
   library(RCurl)
