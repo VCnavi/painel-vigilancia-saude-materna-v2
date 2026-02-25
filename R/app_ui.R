@@ -159,9 +159,9 @@ app_ui <- function(request) {
                   numericInput(
                     inputId = "ano",
                     label = HTML("<span class = 'fonte-muito-grande'> Ano </span>"),
-                    value = 2023,
+                    value = 2024,
                     min = 2012,
-                    max = 2024,
+                    max = 2025,
                     step = 1,
                     width = "95%"
                   ),
@@ -175,8 +175,8 @@ app_ui <- function(request) {
                       "<span class = 'fonte-muito-grande'> Período de análise </span>"
                     ),
                     min = 2012,
-                    max = 2024,
-                    value = c(2012, 2023),
+                    max = 2025,
+                    value = c(2012, 2024),
                     step = 1,
                     sep = '',
                     width = "90%"
@@ -347,14 +347,14 @@ app_ui <- function(request) {
               )
             ),
             conditionalPanel(
-              condition = "(input.abas == 'nivel_1' & input.ano == 2024)  | (input.abas != 'nivel_1' & input.ano2[1] == 2024)",
+              condition = "(input.abas == 'nivel_1' & input.ano == 2025)  | (input.abas != 'nivel_1' & input.ano2[1] == 2025)",
               fluidRow(
                 column(
                   width = 3,
                   HTML(
                     "
                     <div style = 'text-align: left;'> <b class = 'fonte-grande'>
-                        <i class='fa-solid fa-circle-info'></i> &nbsp; Os dados de 2024 são preliminares (atualizados em 09 de maio de 2025)
+                        <i class='fa-solid fa-circle-info'></i> &nbsp; Os dados de 2025 são preliminares (atualizados em 26 de fevereiro de 2026)
                     </b> </div>
                     <span style='display: block; margin-bottom: 15px;'> </span>
                   "

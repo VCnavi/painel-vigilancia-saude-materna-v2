@@ -38,11 +38,14 @@ est_pop_tabnet <- function(periodo = 12:24, sexo = 2, idade_min = 10, idade_max 
 
     # Ler o arquivo DBF
     caminho_dbf <- file.path(temp_dir, arquivo_dbf)
-    df <- read.dbf(caminho_dbf, as.is = TRUE)
+    df <- read.dbf(caminho_dbf, as.is = TRUE) |>
+      janitor::clean_names()
+
+    # print(colnames(df))
 
     # Transformar COD_MUN em caracter e renomeá-la
     df <- df |>
-      rename(codmunres = COD_MUN, ano = ANO) |>
+      rename(codmunres = cod_mun, ano = ano) |>
       mutate(
         codmunres = as.numeric(codmunres),
         codmunres = substr(codmunres, 1, 6)
@@ -50,13 +53,13 @@ est_pop_tabnet <- function(periodo = 12:24, sexo = 2, idade_min = 10, idade_max 
 
     # Filtrar SEXO e IDADE
     df <- df |>
-      mutate(IDADE = as.numeric(as.character(IDADE))) |>
-      filter(SEXO == sexo, IDADE >= idade_min, IDADE <= idade_max)
+      mutate(idade = as.numeric(as.character(idade))) |>
+      filter(sexo == sexo, idade >= idade_min, idade <= idade_max)
 
     # Agrupar e somar POP
     df_resumo <- df |>
       group_by(codmunres, ano) |>
-      summarise(!!glue::glue("populacao_feminina_{idade_min}_a_{idade_max}") := sum(POP, na.rm = TRUE), .groups = "drop")
+      summarise(!!glue::glue("populacao_feminina_{idade_min}_a_{idade_max}") := sum(pop, na.rm = TRUE), .groups = "drop")
 
     # Adicionar o dataframe à lista
     lista_dfs[[ano]] <- df_resumo
