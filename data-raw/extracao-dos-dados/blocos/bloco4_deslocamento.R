@@ -6,7 +6,7 @@ library(tidyverse)
 
 #### Baixando os dados do sinasc de 2012-2022
 
-anos <- c(2012, 2014:2023)
+anos <- c(2023:2024)
 dados <- data.frame()
 
 for (i in anos){
@@ -29,20 +29,23 @@ rm(df,anos,i)
 
 ## Não há a variável TPROBSON para 2013
 
-df13 <- fetch_datasus(
-  year_start = 2013,
-  year_end = 2013,
-  information_system = "SINASC",
-  vars = c("CODMUNRES", "CODMUNNASC", 'CODESTAB', "LOCNASC",
-           "PARTO", "IDADEMAE", "ESCMAE", "RACACORMAE", "PESO")
-) |> mutate(ANO = 2013)
+#df13 <- fetch_datasus(
+#  year_start = 2013,
+#  year_end = 2013,
+#  information_system = "SINASC",
+#  vars = c("CODMUNRES", "CODMUNNASC", 'CODESTAB', "LOCNASC",
+#           "PARTO", "IDADEMAE", "ESCMAE", "RACACORMAE", "PESO")
+#) |> mutate(ANO = 2013)
 
-df13$TPROBSON <- rep("NA", nrow(df13))
+#df13$TPROBSON <- rep("NA", nrow(df13))
 # data.table::fwrite(df13, paste0("data-raw/csv/sinasc_2013.csv"))
 
 ## Juntando os dados do sinasc de 2013 aos dados dos outros anos
 
-df_sinasc_consolidados <- rbind(dados, df13)
+#df_sinasc_consolidados <- rbind(dados, df13)
+
+df_sinasc_consolidados <- dados
+
 rm(df13)
 
 #### Baixando os dados preliminares do sinasc 2023
@@ -51,24 +54,24 @@ options(timeout=99999)
 
 #### Baixando os dados res do sinasc 2024
 
-df24 <- data.table::fread(
-  "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2024.csv",
+df25 <- data.table::fread(
+  "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2025_csv.zip",
   sep= ";") |>
   select("CODMUNRES", "CODMUNNASC", 'CODESTAB', "LOCNASC",
          "PARTO", "IDADEMAE", "ESCMAE", "RACACORMAE",
-         "TPROBSON", "PESO") |> mutate(ANO = 2024)
+         "TPROBSON", "PESO") |> mutate(ANO = 2025)
 
 
 #### Juntando os preliminares aos consolidados
 
-df_sinasc_consolidados <- rbind(df_sinasc_consolidados, df24)
+df_sinasc_consolidados <- rbind(df_sinasc_consolidados, df25)
 
-data.table::fwrite(df_sinasc_consolidados, "data-raw/csv/sinasc_2012_2024.csv",
+data.table::fwrite(df_sinasc_consolidados, "data-raw/csv/sinasc_2023_2025.csv",
                    row.names = FALSE)
 
 #### Baixando dados do cnes leitos
 
-anos <- c(2012:2024)
+anos <- c(2023:2025)
 cnes_leitos <- data.frame()
 
 for (i in anos){
@@ -86,7 +89,7 @@ for (i in anos){
 }
 rm(df,anos,i)
 
-data.table::fwrite(cnes_leitos, "data-raw/csv/cnes_leitos_2012_2024.csv",
+data.table::fwrite(cnes_leitos, "data-raw/csv/cnes_leitos_2023_2025.csv",
                    row.names = FALSE)
 
 
@@ -96,12 +99,12 @@ data.table::fwrite(cnes_leitos, "data-raw/csv/cnes_leitos_2012_2024.csv",
 
 rm(list = ls())
 
-sinasc <- data.table::fread("data-raw/csv/sinasc_2012_2024.csv") |>
+sinasc <- data.table::fread("data-raw/csv/sinasc_2023_2025.csv") |>
   filter(PESO < 1500) |>
   select(CODMUNRES, CODMUNNASC, ANO, CODESTAB, PESO) |>
   janitor::clean_names()
 
-cnes <- data.table::fread("data-raw/csv/cnes_leitos_2012_2024.csv") |>
+cnes <- data.table::fread("data-raw/csv/cnes_leitos_2023_2025.csv") |>
   janitor::clean_names() |>
   rename(codestab = cnes)
 
@@ -213,7 +216,7 @@ mun <- read.csv("data-raw/extracao-dos-dados/blocos/databases_auxiliares/tabela_
   janitor::clean_names() |>
   select(codmunres)
 
-anos <- data.frame(ano = c(2012:2024))
+anos <- data.frame(ano = c(2023:2025))
 
 mun_anos <- cross_join(mun, anos)
 
@@ -227,8 +230,7 @@ dados1 <- left_join(mun_anos, dados)
 
 dados1[is.na(dados1)] <- 0
 
-
-write.csv(dados1, "data-raw/csv/indicador_deslocamento_1500_2012_2024.csv",
+write.csv(dados1, "data-raw/csv/indicador_deslocamento_1500_2023_2025.csv",
           row.names = FALSE)
 
 rm(dados, dados1, sinasc_cnes_macro, cod_neonat, mun_anos)
@@ -241,7 +243,7 @@ rm(list = ls())
 
 # Carregando e tratando o cnes
 
-cnes_leitos <- data.table::fread("data-raw/csv/cnes_leitos_2012_2024.csv")
+cnes_leitos <- data.table::fread("data-raw/csv/cnes_leitos_2023_2025.csv")
 
 cnes_leitos <- cnes_leitos |>
   mutate(CODLEITO = as.numeric(CODLEITO))|>
@@ -252,7 +254,7 @@ cnes_leitos <- cnes_leitos |>
 
 # Carregando e tratando o sinasc
 
-dados <- data.table::fread("data-raw/csv/sinasc_2012_2024.csv")
+dados <- data.table::fread("data-raw/csv/sinasc_2023_2025.csv")
 
 # Tratando os níveis
 
@@ -600,17 +602,17 @@ dados10 <- full_join(dados9, dados8, by = c("ano", "codmunres"))
 rm(dados8, dados9)
 
 ## Dados dos estabelecimentos do CNES, disponivel em:
-## https://opendatasus.saude.gov.br/dataset/cnes-cadastro-nacional-de-estabelecimentos-de-saude
+## https://dadosabertos.saude.gov.br/dataset/cnes-cadastro-nacional-de-estabelecimentos-de-saude/resource/78b91d79-bb6d-43ad-bda5-f015e3575a84
 
-dados_cnes_estabelecimento <- data.table::fread("data-raw/extracao-dos-dados/blocos/databases_auxiliares/cnes_estabelecimentos.csv")
+dados_cnes_estabelecimento <- data.table::fread("data-raw/extracao-dos-dados/blocos/databases_auxiliares/cnes_estabelecimentos_2026.csv")
 
-# dados_cnes_estabelecimento <- dados_cnes_estabelecimento |>
-#   select(CO_CNES, NO_FANTASIA) |>
-#   rename(cnes = CO_CNES,
-#          nome_estabelecimento_fantasia = NO_FANTASIA)
-#
-# data.table::fwrite(dados_cnes_estabelecimento, "data-raw/extracao-dos-dados/blocos/databases_auxiliares/cnes_estabelecimentos.csv",
-#                    row.names = FALSE)
+#dados_cnes_estabelecimento <- dados_cnes_estabelecimento |>
+#  select(CO_CNES, NO_FANTASIA) |>
+#  rename(cnes = CO_CNES,
+#         nome_estabelecimento_fantasia = NO_FANTASIA)
+
+data.table::fwrite(dados_cnes_estabelecimento, "data-raw/extracao-dos-dados/blocos/databases_auxiliares/cnes_estabelecimentos_2026.csv",
+                   row.names = FALSE)
 
 ## Juntando os dados
 
@@ -623,7 +625,7 @@ rm(dados10, dados_cnes_estabelecimento)
 dados_muni2 <- read.csv("data-raw/extracao-dos-dados/blocos/databases_auxiliares/tabela_aux_municipios.csv") |>
   select(codmunres) |> unique()
 
-anos <- data.frame(ano = c(2012:2024))
+anos <- data.frame(ano = c(2023:2025))
 
 dados_muni4 <- cross_join(dados_muni2, anos)
 
@@ -638,13 +640,13 @@ rm(dados11, dados_muni4, dados_muni2, anos)
 ######### Unindo os dois indicadores para municipios em um arquivo so ##########
 
 # dados12 <- data.table::fread("databases/indicadores_bloco4_deslocamento_parto_municipio_2012_2023.csv")
-dados_1500 <- data.table::fread("data-raw/csv/indicador_deslocamento_1500_2012_2024.csv")
+dados_1500 <- data.table::fread("data-raw/csv/indicador_deslocamento_1500_2023_2025.csv")
 
 dados_municipio <- full_join(dados12, dados_1500, by = c("codmunres","ano"))
 
 dados_municipio$km_partos_fora_uf <- as.numeric(dados_municipio$km_partos_fora_uf)
 
-data.table::fwrite(dados_municipio,"data-raw/csv/indicadores_bloco4_deslocamento_parto_municipio_2012-2024.csv")
+data.table::fwrite(dados_municipio,"data-raw/csv/indicadores_bloco4_deslocamento_parto_municipio_2023-2025.csv")
 
 rm(dados12,dados_1500,dados_municipio)
 
@@ -821,7 +823,7 @@ codigos_uf2 <- data.table::fread("data-raw/extracao-dos-dados/blocos/databases_a
   select(!codmunres) |>
   unique()
 
-anos <- data.frame(ano = c(2012:2024))
+anos <- data.frame(ano = c(2023:2025))
 
 codigos_uf3 <- cross_join(codigos_uf2, anos)
 
@@ -1004,7 +1006,7 @@ dados9_br$cod_uf <- 55
 
 codigos_uf2 <- data.frame(cod_uf = 55, uf = "Brasil")
 
-anos <- data.frame(ano = c(2012:2024))
+anos <- data.frame(ano = c(2023:2025))
 
 codigos_uf3 <- cross_join(codigos_uf2, anos)
 
@@ -1022,7 +1024,7 @@ dados11_uf <- rbind(dados10_uf, dados10_br)
 rm(dados9_br, dados10_uf, dados10_br)
 
 # Exportando os dados
-data.table::fwrite(dados11_uf, "data-raw/csv/indicadores_bloco4_deslocamento_parto_UF_2012-2024.csv")
+data.table::fwrite(dados11_uf, "data-raw/csv/indicadores_bloco4_deslocamento_parto_UF_2023-2025.csv")
 
 rm(dados11_uf, dados, dados5)
 
