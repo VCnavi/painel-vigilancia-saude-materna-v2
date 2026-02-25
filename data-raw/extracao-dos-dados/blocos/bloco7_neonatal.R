@@ -9,6 +9,15 @@ library(future)
 library(future.apply)
 library(readxl)
 
+# Inserir informações:
+# Todos os anos a serem baixados
+anos <- c(2023:2025)
+# Ano baixado pelo opendatasus
+ano_opendatasus <- 2025
+# Links para o ano baixado pelo opendatasus
+link_opendatasus_sim <- "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/csv/DO25OPEN_csv.zip"
+link_opendatasus_sinasc <- "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2025_csv.zip"
+
 # Baixando todos os dados necessários (com paralelização) ---------------------
 ## Criando o planejamento dos futures
 plan(multisession)
@@ -56,15 +65,15 @@ processa_ano <- function(ano) {
   # Criando uma função genérica para baixar dados pelo microdatasus
   baixa_dados <- function(ano, sistema, data_col, vars = NULL) {
     # Tratamento especial para os dados preliminares
-    if (ano == 2024) {
+    if (ano == ano_opendatasus) {
       switch(sistema,
              "SIM-DOINF" = {
-               fread_retry("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/DO24OPEN.csv") |>
+               fread_retry(link_opendatasus_sim) |>
                  mutate(ano = extrai_ano(.data[[data_col]])) |>
                  pre_processa_doinf()
              },
              "SINASC" = {
-               fread_retry("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2024.csv", sep = ";") |>
+               fread_retry(link_opendatasus_sinasc, sep = ";") |>
                  mutate(ano = extrai_ano(.data[[data_col]])) |>
                  select(CODMUNRES, ano, PESO)
              }
@@ -97,8 +106,6 @@ processa_ano <- function(ano) {
   )
 }
 
-## Criando um vetor com os anos a serem baixados
-anos <- 2012:2024
 
 ## Baixando todos os dados
 resultados <- future_lapply(anos, processa_ano)
@@ -109,7 +116,7 @@ df_doinf <- rbindlist(lapply(resultados, `[[`, "doinf"), fill = TRUE)
 
 ## Criando uma função para salvar os arquivos
 salva_csv_gz <- function(df, nome) {
-  path <- paste0("data-raw/extracao-dos-dados/blocos/databases_auxiliares/", nome, "_2012_2024.csv.gz")
+  path <- paste0("data-raw/extracao-dos-dados/blocos/databases_auxiliares/", nome, "_2023_2025.csv.gz")
   write.csv(df, gzfile(path), row.names = FALSE)
 }
 
@@ -120,11 +127,11 @@ salva_csv_gz(df_doinf, "df_sim_neonatais")
 
 # Para os indicadores de número de óbitos, taxa de mortalidade e distribuição dos óbitos por peso ou momento do óbito -----
 ## Lendo o arquivo com os óbitos neonatais no período de 2012-2024
-df_obitos_neonatais <- fread("data-raw/extracao-dos-dados/blocos/databases_auxiliares/df_sim_neonatais_2012_2024.csv.gz") |>
+df_obitos_neonatais <- fread("data-raw/extracao-dos-dados/blocos/databases_auxiliares/df_sim_neonatais_2023_2025.csv.gz") |>
   mutate(CODMUNRES = as.character(CODMUNRES))
 
 ## Lendo o arquivo com os nascimentos no período de 2012-2024
-df_sinasc <- fread("data-raw/extracao-dos-dados/blocos/databases_auxiliares/df_sinasc_2012_2024.csv.gz") |>
+df_sinasc <- fread("data-raw/extracao-dos-dados/blocos/databases_auxiliares/df_sinasc_2023_2025.csv.gz") |>
   mutate(CODMUNRES = as.character(CODMUNRES))
 
 ## Criando um objeto que recebe os códigos dos municípios que utilizamos no painel
@@ -133,7 +140,7 @@ codigos_municipios <- read.csv("data-raw/extracao-dos-dados/blocos/databases_aux
   as.character()
 
 ## Criando um data.frame auxiliar que possui uma linha para cada combinação de município e ano
-df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2012:2024)), ano = 2012:2024)
+df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2023:2025)), ano = 2023:2025)
 
 ## Para os dados do SINASC, criando variáveis de nascidos vivos por faixa de peso
 df_indicadores_sinasc <- df_sinasc |>
@@ -292,12 +299,12 @@ df_indicadores_neonatais <- df_obitos_neonatais |>
   arrange(codmunres, ano)
 
 ## Salvando a base final
-write.csv(df_indicadores_neonatais, "data-raw/csv/indicadores_bloco7_mortalidade_neonatal_2012-2024.csv", row.names = FALSE)
+write.csv(df_indicadores_neonatais, "data-raw/csv/indicadores_bloco7_mortalidade_neonatal_2023-2025.csv", row.names = FALSE)
 
 
 # Para os indicadores de causas evitáveis ---------------------------------------
 ## Lendo o arquivo com os óbitos neonatais no período de 2012-2024
-df_obitos_neonatais <- fread("data-raw/extracao-dos-dados/blocos/databases_auxiliares/df_sim_neonatais_2012_2024.csv.gz") |>
+df_obitos_neonatais <- fread("data-raw/extracao-dos-dados/blocos/databases_auxiliares/df_sim_neonatais_2023_2025.csv.gz") |>
   mutate(CODMUNRES = as.character(CODMUNRES))
 
 ## Criando um objeto que recebe os códigos dos municípios que utilizamos no painel
@@ -306,7 +313,7 @@ codigos_municipios <- read.csv("data-raw/extracao-dos-dados/blocos/databases_aux
   as.character()
 
 ## Criando um data.frame auxiliar que possui uma linha para cada combinação de município e ano
-df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2012:2024)), ano = 2012:2024)
+df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2023:2025)), ano = 2023:2025)
 
 ## Definindo os vetores de CIDs
 ### Criando vetores com as cids de cada grupo de causas evitáveis
@@ -441,12 +448,12 @@ df_bloco7_neonatais_evitaveis <- list(
   )
 
 ## Salvando a base final
-write.csv(df_bloco7_neonatais_evitaveis, "data-raw/csv/indicadores_bloco7_causas_evitaveis_neonatal_2012-2024.csv", row.names = FALSE)
+write.csv(df_bloco7_neonatais_evitaveis, "data-raw/csv/indicadores_bloco7_causas_evitaveis_neonatal_2023-2025.csv", row.names = FALSE)
 
 
 # Para os indicadores de grupos de causas ---------------------------------------
 ## Lendo o arquivo com os óbitos neonatais no período de 2012-2024
-df_obitos_neonatais <- fread("data-raw/extracao-dos-dados/blocos/databases_auxiliares/df_sim_neonatais_2012_2024.csv.gz") |>
+df_obitos_neonatais <- fread("data-raw/extracao-dos-dados/blocos/databases_auxiliares/df_sim_neonatais_2023_2025.csv.gz") |>
   mutate(CODMUNRES = as.character(CODMUNRES))
 
 ## Criando um objeto que recebe os códigos dos municípios que utilizamos no painel
@@ -455,7 +462,7 @@ codigos_municipios <- read.csv("data-raw/extracao-dos-dados/blocos/databases_aux
   as.character()
 
 ## Criando um data.frame auxiliar que possui uma linha para cada combinação de município e ano
-df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2012:2024)), ano = 2012:2024)
+df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2023:2025)), ano = 2023:2025)
 
 ## Definindo os vetores de CIDs
 ### Criando vetores com as cids de cada grupo
@@ -561,4 +568,4 @@ df_bloco7_principais_neonatal <- list(
   )
 
 ## Salvando a base final
-write.csv(df_bloco7_principais_neonatal, "data-raw/csv/indicadores_bloco7_causas_principais_neonatal_2012-2024.csv", row.names = FALSE)
+write.csv(df_bloco7_principais_neonatal, "data-raw/csv/indicadores_bloco7_causas_principais_neonatal_2023-2025.csv", row.names = FALSE)

@@ -75,7 +75,7 @@ tabela_aux_municipios <- dplyr::left_join(
 # Criando as bases de cada bloco ------------------------------------------
 ## Para o bloco 1 ---------------------------------------------------------
 ### Lendo o arquivo contendo todos os indicadores
-bloco1_aux <- read.csv("data-raw/csv/indicadores_bloco1_socioeconomicos_2012-2024.csv") |>
+bloco1_aux <- read.csv("data-raw/csv/indicadores_bloco1_socioeconomicos_2012-2025.csv") |>
   janitor::clean_names()
 
 ### Adicionando as informações dos municípios
@@ -103,7 +103,7 @@ bloco2 <- bloco2 |>
 
 ## Para o bloco 3 ---------------------------------------------------------
 ### Lendo o arquivo contendo todos os indicadores
-bloco3_aux <- read.csv("data-raw/csv/indicadores_bloco3_assistencia_pre-natal_2012-2024.csv") |>
+bloco3_aux <- read.csv("data-raw/csv/indicadores_bloco3_assistencia_pre-natal_2012-2025.csv") |>
   janitor::clean_names()
 
 ### Adicionando as informações dos municípios
@@ -221,7 +221,7 @@ malformacao <- malformacao |>
 
 ## Para o bloco 6  --------------------------------------------------------
 ### Lendo o arquivo contendo todos os indicadores de mortalidade materna
-bloco6_mortalidade_aux <- read.csv("data-raw/csv/indicadores_bloco6_mortalidade_materna_2012-2024.csv")
+bloco6_mortalidade_aux <- read.csv("data-raw/csv/indicadores_bloco6_mortalidade_materna_2012-2025.csv")
 
 ### Lendo o arquivo contendo todos os indicadores de morbidade materna do SUS
 bloco6_morbidade_sus_aux <- read.csv("data-raw/csv/indicadores_bloco6_morbidade_materna_sus_2012-2024.csv", sep = ",") |>
@@ -247,7 +247,7 @@ bloco6 <- bloco6 |>
 ## Para o bloco 7 (aba fetal)  --------------------------------------------
 ### Para os indicadores originais -----------------------------------------
 #### Lendo o arquivo contendo todos os indicadores
-bloco7_fetal_aux <- read.csv("data-raw/csv/indicadores_bloco7_mortalidade_fetal_2012-2024.csv")
+bloco7_fetal_aux <- read.csv("data-raw/csv/indicadores_bloco7_mortalidade_fetal_2012-2025.csv")
 
 #### Adicionando as informações dos municípios
 bloco7_fetal <- dplyr::left_join(bloco7_fetal_aux, tabela_aux_municipios, by = "codmunres")
@@ -259,7 +259,7 @@ bloco7_fetal <- bloco7_fetal |>
 
 ### Para os indicadores de causas evitáveis -------------------------------
 #### Lendo o arquivo contendo todos os indicadores
-bloco7_evitaveis_fetal_aux <- read.csv("data-raw/csv/indicadores_bloco7_causas_evitaveis_fetal_2012-2024.csv")
+bloco7_evitaveis_fetal_aux <- read.csv("data-raw/csv/indicadores_bloco7_causas_evitaveis_fetal_2012-2025.csv")
 
 #### Adicionando as informações dos municípios
 bloco7_evitaveis_fetal <- dplyr::left_join(bloco7_evitaveis_fetal_aux, tabela_aux_municipios, by = "codmunres")
@@ -271,7 +271,7 @@ bloco7_evitaveis_fetal <- bloco7_evitaveis_fetal |>
 
 ### Para os indicadores de causas principais ------------------------------
 #### Lendo o arquivo contendo todos os indicadores
-bloco7_principais_fetal_aux <- read.csv("data-raw/csv/indicadores_bloco7_causas_principais_fetal_2012-2024.csv")
+bloco7_principais_fetal_aux <- read.csv("data-raw/csv/indicadores_bloco7_causas_principais_fetal_2012-2025.csv")
 
 #### Adicionando as informações dos municípios
 bloco7_principais_fetal <- dplyr::left_join(bloco7_principais_fetal_aux, tabela_aux_municipios, by = "codmunres")
@@ -285,7 +285,7 @@ bloco7_principais_fetal <- bloco7_principais_fetal |>
 ## Para o bloco 7 (aba neonatal)  -----------------------------------------
 ### Para os indicadores originais -----------------------------------------
 #### Lendo o arquivo contendo todos os indicadores
-bloco7_neonatal_aux <- read.csv("data-raw/csv/indicadores_bloco7_mortalidade_neonatal_2012-2024.csv")
+bloco7_neonatal_aux <- read.csv("data-raw/csv/indicadores_bloco7_mortalidade_neonatal_2012-2025.csv")
 
 #### Adicionando as informações dos municípios
 bloco7_neonatal <- dplyr::left_join(bloco7_neonatal_aux, tabela_aux_municipios, by = "codmunres")
@@ -297,7 +297,7 @@ bloco7_neonatal <- bloco7_neonatal |>
 
 ### Para os indicadores de causas evitáveis -------------------------------
 #### Lendo o arquivo contendo todos os indicadores
-bloco7_evitaveis_neonatal_aux <- read.csv("data-raw/csv/indicadores_bloco7_causas_evitaveis_neonatal_2012-2024.csv")
+bloco7_evitaveis_neonatal_aux <- read.csv("data-raw/csv/indicadores_bloco7_causas_evitaveis_neonatal_2012-2025.csv")
 bloco8_grafico_evitaveis_neonatal_aux <- read.csv("data-raw/csv/indicadores_bloco8_grafico_evitaveis_neonatal_2012-2024.csv") |>
   janitor::clean_names()
 
@@ -318,7 +318,7 @@ bloco8_grafico_evitaveis_neonatal <- bloco8_grafico_evitaveis_neonatal |>
 
 ### Para os indicadores de causas principais ------------------------------
 #### Lendo o arquivo contendo todos os indicadores
-bloco7_principais_neonatal_aux <- read.csv("data-raw/csv/indicadores_bloco7_causas_principais_neonatal_2012-2024.csv")
+bloco7_principais_neonatal_aux <- read.csv("data-raw/csv/indicadores_bloco7_causas_principais_neonatal_2012-2025.csv")
 
 #### Adicionando as informações dos municípios
 bloco7_principais_neonatal <- dplyr::left_join(bloco7_principais_neonatal_aux, tabela_aux_municipios, by = "codmunres")
@@ -332,7 +332,7 @@ bloco7_principais_neonatal <- bloco7_principais_neonatal |>
 ## Para o bloco 7 (aba perinatal)  -----------------------------------------
 ### Para os indicadores originais -----------------------------------------
 #### Lendo o arquivo contendo todos os indicadores
-bloco7_perinatal_aux <- read.csv("data-raw/csv/indicadores_bloco7_mortalidade_perinatal_2012-2024.csv")
+bloco7_perinatal_aux <- read.csv("data-raw/csv/indicadores_bloco7_mortalidade_perinatal_2012-2025.csv")
 
 #### Adicionando as informações dos municípios
 bloco7_perinatal <- dplyr::left_join(bloco7_perinatal_aux, tabela_aux_municipios, by = "codmunres")
@@ -344,7 +344,7 @@ bloco7_perinatal <- bloco7_perinatal |>
 
 ### Para os indicadores de causas evitáveis -------------------------------
 #### Lendo o arquivo contendo todos os indicadores
-bloco7_evitaveis_perinatal_aux <- read.csv("data-raw/csv/indicadores_bloco7_causas_evitaveis_perinatal_2012-2024.csv")
+bloco7_evitaveis_perinatal_aux <- read.csv("data-raw/csv/indicadores_bloco7_causas_evitaveis_perinatal_2012-2025.csv")
 
 #### Adicionando as informações dos municípios
 bloco7_evitaveis_perinatal <- dplyr::left_join(bloco7_evitaveis_perinatal_aux, tabela_aux_municipios, by = "codmunres")
@@ -356,7 +356,7 @@ bloco7_evitaveis_perinatal <- bloco7_evitaveis_perinatal |>
 
 ### Para os indicadores de causas principais ------------------------------
 #### Lendo o arquivo contendo todos os indicadores
-bloco7_principais_perinatal_aux <- read.csv("data-raw/csv/indicadores_bloco7_causas_principais_perinatal_2012-2024.csv")
+bloco7_principais_perinatal_aux <- read.csv("data-raw/csv/indicadores_bloco7_causas_principais_perinatal_2012-2025.csv")
 
 #### Adicionando as informações dos municípios
 bloco7_principais_perinatal <- dplyr::left_join(bloco7_principais_perinatal_aux, tabela_aux_municipios, by = "codmunres")
@@ -383,7 +383,7 @@ bloco7_morbidade_neonatal <- bloco7_morbidade_neonatal |>
 
 ### Para os indicadores de causas evitáveis e causas principais -----------
 #### Lendo o arquivo contendo todos os indicadores
-bloco7_dist_morbidade_aux <- read.csv("data-raw/csv/indicadores_bloco7_distribuicao_morbidade_neonatal_2012-2024.csv") |>
+bloco7_dist_morbidade_aux <- read.csv("data-raw/csv/indicadores_bloco7_distribuicao_morbidade_neonatal_2012-2025.csv") |>
   dplyr::left_join(bloco7_neonatal_aux |> dplyr::select(codmunres, ano, total_de_nascidos_vivos))
 
 #### Adicionando as informações dos municípios
@@ -401,7 +401,7 @@ bloco7_dist_morbidade[is.na(bloco7_dist_morbidade)] <- 0
 # Criando as bases de indicadores de qualidade da informação --------------
 ## Para os indicadores de garbage codes -----------------------------------
 ### Lendo o arquivo contendo todos os indicadores de garbage code para mortalidade
-base_garbage_code_mortalidade_aux <- read.csv("data-raw/csv/indicadores_bloco8_graficos_garbage_code_2012-2024.csv") |>
+base_garbage_code_mortalidade_aux <- read.csv("data-raw/csv/indicadores_bloco8_graficos_garbage_code_2012-2025.csv") |>
   janitor::clean_names()
 
 ### Lendo o arquivo contendo todos os indicadores de garbage code para morbidade
@@ -561,7 +561,7 @@ rmm_fator_de_correcao <- read.csv("data-raw/csv/rmm_fator_de_correcao.csv", sep 
   )
 
 ## Carregando a base que contém as RMM corrigidas para estado, região e Brail de 2012 a 2021
-rmm_corrigida <- read.csv("data-raw/csv/rmm_corrigida_2012-2021.csv") |>
+rmm_corrigida <- read.csv("data-raw/csv/rmm_corrigida_2012-2024.csv") |>
   dplyr::select(ano, localidade, RMM) |>
   dplyr::mutate(RMM = round(RMM, 1))
 

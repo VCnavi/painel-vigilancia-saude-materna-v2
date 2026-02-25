@@ -13,7 +13,9 @@ library(data.table)
 # Criar um vetor para armazenar os dados de cada ano
 df_list <- list()
 
-anos <- c(2012, 2014:2023)
+df_lis
+
+anos <- c(2012, 2014:2024)
 
 for (ano in anos){
 
@@ -48,7 +50,8 @@ df_list[[2013 - 2011]] <- df_ano
 df <- bind_rows(df_list)
 rm(df_list, df_ano)
 
-# write.csv(df, "data-raw/csv/dados_sinasc_bloco3.csv")
+# data.table::fwrite(df, "data-raw/csv/dados_sinasc_bloco3.csv")
+# df <- data.table::fread("data-raw/csv/dados_sinasc_bloco3.csv")
 
 # df_proc <- process_sinasc(df1, municipality_data = T) |>
 #   select(
@@ -62,29 +65,23 @@ rm(df_list, df_ano)
 #     ano = as.numeric(substr(DTNASC, 1, 4))
 #   )
 
-# Dados ainda não consolidados
-#options(timeout=99999)
+options(timeout=99999)
 
-#sinasc23 <- fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/DNOPEN23.csv", sep = ";")
-#sinasc23 <- sinasc23 |>
-#  mutate(ano = 2023) |>
-#  select(ano, CODMUNRES, DTNASC, CONSPRENAT, MESPRENAT, SEMAGESTAC)
-#
-# sinasc24 <- fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/DNOPEN24.csv", sep = ";")
-# sinasc24 <- sinasc24 |>
-#   mutate(ano = 2024) |>
-#   select(ano, CODMUNRES, DTNASC, CONSPRENAT, MESPRENAT, SEMAGESTAC)
+## Baixando os dados preliminares do SINASC de 2025 e selecionando as variáveis de interesse
+temp_zip <- tempfile(fileext = ".zip")
+temp_dir <- tempdir()
 
-# Dados consolidados que não estão no microdatasus
+download.file("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2025_csv.zip",
+              temp_zip, mode = "wb")
 
-sinasc24 <- fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2024.csv", sep = ";") |>
-  mutate(ano = 2024) |>
+files <- unzip(temp_zip, exdir = temp_dir)
+
+df_sinasc_preliminares <- fread(files[1], sep = ";") |>
+  mutate(ano = 2025) |>
   select(ano, CODMUNRES, DTNASC, CONSPRENAT, MESPRENAT, SEMAGESTAC)
 
 # Juntar os dataframes da lista em um único dataframe
-df <- rbind(df, sinasc24)
-
-#rm(sinasc24)
+df <- rbind(df, df_sinasc_preliminares)
 
 # Tratando os dados
 df2 <- df |>
@@ -148,7 +145,7 @@ codigos_municipios <- read_csv("data-raw/extracao-dos-dados/blocos/databases_aux
   pull(municipio)
 
 # Criando um data.frame auxiliar que possui uma linha para cada combinação de município e ano
-df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2012:2024)), ano = 2012:2024)
+df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2012:2025)), ano = 2012:2025)
 
 # Transformando as colunas que estão em caracter para numéricas
 df2 <- df2 |> mutate_if(is.character, as.numeric)
@@ -230,4 +227,4 @@ df_bloco3$casos_sc[is.na(df_bloco3$casos_sc)] <- 0
 df_bloco3$casos_sc[df_bloco3$ano == 2024] <- NA
 
 # Salvando a base de dados completa -----------------
-write.csv(df_bloco3, "data-raw/csv/indicadores_bloco3_assistencia_pre-natal_2012-2024.csv", row.names = FALSE)
+write.csv(df_bloco3, "data-raw/csv/indicadores_bloco3_assistencia_pre-natal_2012-2025.csv", row.names = FALSE)

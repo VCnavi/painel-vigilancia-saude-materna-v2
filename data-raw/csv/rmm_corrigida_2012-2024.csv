@@ -1,0 +1,430 @@
+"localidade","ano","RMM"
+"Norte","2012",73.18
+"Norte","2013",83.78
+"Norte","2014",93.57
+"Norte","2015",76.01
+"Norte","2016",84.55
+"Norte","2017",88.91
+"Norte","2018",80.83
+"Norte","2019",82.49
+"Norte","2020",98.94
+"Norte","2021",153.87
+"Norte","2022",81.96
+"Norte","2023",80.23
+"Norte","2024",76.03
+"Rondônia","2012",64.12
+"Rondônia","2013",94.16
+"Rondônia","2014",87.71
+"Rondônia","2015",57.72
+"Rondônia","2016",56.39
+"Rondônia","2017",87.26
+"Rondônia","2018",47.81
+"Rondônia","2019",59.63
+"Rondônia","2020",78.09
+"Rondônia","2021",188.69
+"Rondônia","2022",52.21
+"Rondônia","2023",50.17
+"Rondônia","2024",41.44
+"Acre","2012",53.89
+"Acre","2013",58.57
+"Acre","2014",46.68
+"Acre","2015",58.89
+"Acre","2016",69.74
+"Acre","2017",48.91
+"Acre","2018",54.4
+"Acre","2019",49.14
+"Acre","2020",33.02
+"Acre","2021",95.55
+"Acre","2022",48.33
+"Acre","2023",55.28
+"Acre","2024",53.43
+"Amazonas","2012",84.98
+"Amazonas","2013",81.55
+"Amazonas","2014",120.81
+"Amazonas","2015",78.8
+"Amazonas","2016",84.74
+"Amazonas","2017",75.58
+"Amazonas","2018",108.35
+"Amazonas","2019",84.78
+"Amazonas","2020",101.8
+"Amazonas","2021",155.51
+"Amazonas","2022",82.74
+"Amazonas","2023",88
+"Amazonas","2024",69.75
+"Roraima","2012",38
+"Roraima","2013",74.51
+"Roraima","2014",60.38
+"Roraima","2015",96.39
+"Roraima","2016",52.74
+"Roraima","2017",59.64
+"Roraima","2018",100.64
+"Roraima","2019",91.86
+"Roraima","2020",146.4
+"Roraima","2021",309.33
+"Roraima","2022",160.42
+"Roraima","2023",129.72
+"Roraima","2024",165.43
+"Pará","2012",78.92
+"Pará","2013",86.69
+"Pará","2014",96.39
+"Pará","2015",72.92
+"Pará","2016",86.43
+"Pará","2017",107.44
+"Pará","2018",81.44
+"Pará","2019",96.11
+"Pará","2020",107.09
+"Pará","2021",131.26
+"Pará","2022",79.69
+"Pará","2023",77.68
+"Pará","2024",75.91
+"Amapá","2012",54.1
+"Amapá","2013",119.68
+"Amapá","2014",66.03
+"Amapá","2015",110.85
+"Amapá","2016",141.74
+"Amapá","2017",45.46
+"Amapá","2018",88.25
+"Amapá","2019",32.56
+"Amapá","2020",102.51
+"Amapá","2021",93.38
+"Amapá","2022",80.79
+"Amapá","2023",92.68
+"Amapá","2024",73.01
+"Tocantins","2012",53.29
+"Tocantins","2013",61.25
+"Tocantins","2014",60.13
+"Tocantins","2015",85.57
+"Tocantins","2016",92.17
+"Tocantins","2017",96.25
+"Tocantins","2018",31.62
+"Tocantins","2019",71.41
+"Tocantins","2020",79.24
+"Tocantins","2021",227.4
+"Tocantins","2022",102
+"Tocantins","2023",82.09
+"Tocantins","2024",95.8
+"Nordeste","2012",72.73
+"Nordeste","2013",82.42
+"Nordeste","2014",77.93
+"Nordeste","2015",75.33
+"Nordeste","2016",78
+"Nordeste","2017",73.17
+"Nordeste","2018",67.11
+"Nordeste","2019",63.56
+"Nordeste","2020",91.76
+"Nordeste","2021",115
+"Nordeste","2022",67.28
+"Nordeste","2023",63.69
+"Nordeste","2024",66.85
+"Maranhão","2012",96.06
+"Maranhão","2013",123.78
+"Maranhão","2014",100.95
+"Maranhão","2015",116.52
+"Maranhão","2016",122.18
+"Maranhão","2017",101.78
+"Maranhão","2018",90.56
+"Maranhão","2019",80.59
+"Maranhão","2020",108.88
+"Maranhão","2021",158.28
+"Maranhão","2022",91.87
+"Maranhão","2023",97.73
+"Maranhão","2024",87.88
+"Piauí","2012",126
+"Piauí","2013",130.19
+"Piauí","2014",86.84
+"Piauí","2015",103.61
+"Piauí","2016",108.54
+"Piauí","2017",88.57
+"Piauí","2018",105.83
+"Piauí","2019",98.06
+"Piauí","2020",100.96
+"Piauí","2021",160.95
+"Piauí","2022",108.88
+"Piauí","2023",59.32
+"Piauí","2024",95.73
+"Ceará","2012",69.36
+"Ceará","2013",74.47
+"Ceará","2014",65.28
+"Ceará","2015",49.05
+"Ceará","2016",63.37
+"Ceará","2017",65.73
+"Ceará","2018",68.45
+"Ceará","2019",58.06
+"Ceará","2020",97.62
+"Ceará","2021",107.26
+"Ceará","2022",56.1
+"Ceará","2023",45.91
+"Ceará","2024",51.21
+"Rio Grande do Norte","2012",65.97
+"Rio Grande do Norte","2013",54.52
+"Rio Grande do Norte","2014",74.83
+"Rio Grande do Norte","2015",68.38
+"Rio Grande do Norte","2016",77.15
+"Rio Grande do Norte","2017",77.88
+"Rio Grande do Norte","2018",58.63
+"Rio Grande do Norte","2019",70.4
+"Rio Grande do Norte","2020",78.11
+"Rio Grande do Norte","2021",149.67
+"Rio Grande do Norte","2022",79.93
+"Rio Grande do Norte","2023",55.78
+"Rio Grande do Norte","2024",87.4
+"Paraíba","2012",61.51
+"Paraíba","2013",70.86
+"Paraíba","2014",63.02
+"Paraíba","2015",81.82
+"Paraíba","2016",99.85
+"Paraíba","2017",67.83
+"Paraíba","2018",53.15
+"Paraíba","2019",62.84
+"Paraíba","2020",97.67
+"Paraíba","2021",126.67
+"Paraíba","2022",47.16
+"Paraíba","2023",56.28
+"Paraíba","2024",62.78
+"Pernambuco","2012",56.04
+"Pernambuco","2013",64.33
+"Pernambuco","2014",63.42
+"Pernambuco","2015",67.58
+"Pernambuco","2016",58.13
+"Pernambuco","2017",63.27
+"Pernambuco","2018",59.23
+"Pernambuco","2019",47.99
+"Pernambuco","2020",70.83
+"Pernambuco","2021",73.69
+"Pernambuco","2022",45.98
+"Pernambuco","2023",61.11
+"Pernambuco","2024",50.53
+"Alagoas","2012",56.26
+"Alagoas","2013",71.64
+"Alagoas","2014",104.13
+"Alagoas","2015",59.11
+"Alagoas","2016",51.91
+"Alagoas","2017",37.72
+"Alagoas","2018",49.53
+"Alagoas","2019",58.23
+"Alagoas","2020",82.75
+"Alagoas","2021",110.64
+"Alagoas","2022",65.59
+"Alagoas","2023",68.75
+"Alagoas","2024",50.62
+"Sergipe","2012",70.36
+"Sergipe","2013",67.2
+"Sergipe","2014",66.92
+"Sergipe","2015",51.55
+"Sergipe","2016",55.87
+"Sergipe","2017",56.1
+"Sergipe","2018",58.81
+"Sergipe","2019",36.7
+"Sergipe","2020",97.53
+"Sergipe","2021",83.32
+"Sergipe","2022",98.16
+"Sergipe","2023",41.37
+"Sergipe","2024",58.09
+"Bahia","2012",70
+"Bahia","2013",80.57
+"Bahia","2014",80.96
+"Bahia","2015",75.38
+"Bahia","2016",72.56
+"Bahia","2017",76.92
+"Bahia","2018",60.83
+"Bahia","2019",64
+"Bahia","2020",93.11
+"Bahia","2021",106.22
+"Bahia","2022",63.28
+"Bahia","2023",65.17
+"Bahia","2024",71.87
+"Sudeste","2012",46.52
+"Sudeste","2013",50.12
+"Sudeste","2014",53.87
+"Sudeste","2015",54.27
+"Sudeste","2016",55.79
+"Sudeste","2017",62.34
+"Sudeste","2018",53.2
+"Sudeste","2019",53.49
+"Sudeste","2020",65.09
+"Sudeste","2021",104.78
+"Sudeste","2022",50.32
+"Sudeste","2023",48.03
+"Sudeste","2024",49.76
+"Minas Gerais","2012",36.6
+"Minas Gerais","2013",47.56
+"Minas Gerais","2014",49.04
+"Minas Gerais","2015",47.05
+"Minas Gerais","2016",46.94
+"Minas Gerais","2017",45.22
+"Minas Gerais","2018",51.21
+"Minas Gerais","2019",44.38
+"Minas Gerais","2020",50.97
+"Minas Gerais","2021",94.57
+"Minas Gerais","2022",46.8
+"Minas Gerais","2023",41.9
+"Minas Gerais","2024",56.86
+"Espírito Santo","2012",64.35
+"Espírito Santo","2013",59.61
+"Espírito Santo","2014",109.24
+"Espírito Santo","2015",73.11
+"Espírito Santo","2016",48.68
+"Espírito Santo","2017",71.63
+"Espírito Santo","2018",63.93
+"Espírito Santo","2019",56.24
+"Espírito Santo","2020",68.82
+"Espírito Santo","2021",99.06
+"Espírito Santo","2022",54.13
+"Espírito Santo","2023",40.24
+"Espírito Santo","2024",48.06
+"Rio de Janeiro","2012",80.77
+"Rio de Janeiro","2013",80.35
+"Rio de Janeiro","2014",71.87
+"Rio de Janeiro","2015",67.1
+"Rio de Janeiro","2016",71.65
+"Rio de Janeiro","2017",84.67
+"Rio de Janeiro","2018",61.68
+"Rio de Janeiro","2019",74.52
+"Rio de Janeiro","2020",95.42
+"Rio de Janeiro","2021",168.54
+"Rio de Janeiro","2022",69.3
+"Rio de Janeiro","2023",73.24
+"Rio de Janeiro","2024",61.08
+"São Paulo","2012",36.81
+"São Paulo","2013",39.29
+"São Paulo","2014",44.21
+"São Paulo","2015",50.83
+"São Paulo","2016",54.37
+"São Paulo","2017",60.64
+"São Paulo","2018",49.99
+"São Paulo","2019",49.74
+"São Paulo","2020",60.11
+"São Paulo","2021",87.01
+"São Paulo","2022",44.88
+"São Paulo","2023",42.86
+"São Paulo","2024",42.69
+"Sul","2012",54.54
+"Sul","2013",36.58
+"Sul","2014",41.71
+"Sul","2015",43.72
+"Sul","2016",44.16
+"Sul","2017",38.48
+"Sul","2018",38.25
+"Sul","2019",38.26
+"Sul","2020",45.64
+"Sul","2021",111.87
+"Sul","2022",40.02
+"Sul","2023",38.03
+"Sul","2024",57.01
+"Paraná","2012",38.38
+"Paraná","2013",41.73
+"Paraná","2014",41.27
+"Paraná","2015",51.73
+"Paraná","2016",50.3
+"Paraná","2017",31.71
+"Paraná","2018",38.41
+"Paraná","2019",45.5
+"Paraná","2020",52.63
+"Paraná","2021",131.71
+"Paraná","2022",46.93
+"Paraná","2023",45.05
+"Paraná","2024",62.58
+"Santa Catarina","2012",45.38
+"Santa Catarina","2013",31.38
+"Santa Catarina","2014",30.25
+"Santa Catarina","2015",30.86
+"Santa Catarina","2016",31.48
+"Santa Catarina","2017",40.68
+"Santa Catarina","2018",35.14
+"Santa Catarina","2019",30.6
+"Santa Catarina","2020",31.66
+"Santa Catarina","2021",98.45
+"Santa Catarina","2022",31.57
+"Santa Catarina","2023",33.06
+"Santa Catarina","2024",54.38
+"Rio Grande do Sul","2012",78.29
+"Rio Grande do Sul","2013",34.2
+"Rio Grande do Sul","2014",49.66
+"Rio Grande do Sul","2015",43.45
+"Rio Grande do Sul","2016",45.97
+"Rio Grande do Sul","2017",44.5
+"Rio Grande do Sul","2018",40.28
+"Rio Grande do Sul","2019",39.91
+"Rio Grande do Sul","2020",48.28
+"Rio Grande do Sul","2021",99.64
+"Rio Grande do Sul","2022",38.86
+"Rio Grande do Sul","2023",33.89
+"Rio Grande do Sul","2024",52.68
+"Centro-Oeste","2012",64.35
+"Centro-Oeste","2013",62.54
+"Centro-Oeste","2014",60.17
+"Centro-Oeste","2015",65.87
+"Centro-Oeste","2016",67.27
+"Centro-Oeste","2017",56.94
+"Centro-Oeste","2018",64.88
+"Centro-Oeste","2019",58.99
+"Centro-Oeste","2020",77.02
+"Centro-Oeste","2021",140.61
+"Centro-Oeste","2022",57.06
+"Centro-Oeste","2023",56.16
+"Centro-Oeste","2024",63.15
+"Mato Grosso do Sul","2012",73.1
+"Mato Grosso do Sul","2013",66.68
+"Mato Grosso do Sul","2014",79.25
+"Mato Grosso do Sul","2015",88.23
+"Mato Grosso do Sul","2016",80.13
+"Mato Grosso do Sul","2017",60.34
+"Mato Grosso do Sul","2018",84.93
+"Mato Grosso do Sul","2019",64.55
+"Mato Grosso do Sul","2020",48.77
+"Mato Grosso do Sul","2021",147.01
+"Mato Grosso do Sul","2022",74.1
+"Mato Grosso do Sul","2023",62.14
+"Mato Grosso do Sul","2024",52.76
+"Mato Grosso","2012",58.53
+"Mato Grosso","2013",71.65
+"Mato Grosso","2014",63.72
+"Mato Grosso","2015",82.94
+"Mato Grosso","2016",78.46
+"Mato Grosso","2017",61.11
+"Mato Grosso","2018",57.97
+"Mato Grosso","2019",64.57
+"Mato Grosso","2020",91.83
+"Mato Grosso","2021",145.23
+"Mato Grosso","2022",49.85
+"Mato Grosso","2023",66.61
+"Mato Grosso","2024",54.24
+"Goiás","2012",70.55
+"Goiás","2013",56.65
+"Goiás","2014",53.83
+"Goiás","2015",56.62
+"Goiás","2016",56.51
+"Goiás","2017",56.4
+"Goiás","2018",64.73
+"Goiás","2019",69.71
+"Goiás","2020",90.55
+"Goiás","2021",153.91
+"Goiás","2022",59.06
+"Goiás","2023",52.28
+"Goiás","2024",75.39
+"Distrito Federal","2012",49.4
+"Distrito Federal","2013",60.32
+"Distrito Federal","2014",51.05
+"Distrito Federal","2015",43.68
+"Distrito Federal","2016",64.61
+"Distrito Federal","2017",49.36
+"Distrito Federal","2018",54.3
+"Distrito Federal","2019",21.22
+"Distrito Federal","2020",53.35
+"Distrito Federal","2021",94.65
+"Distrito Federal","2022",44.53
+"Distrito Federal","2023",42.19
+"Distrito Federal","2024",57.09
+"Brasil","2012",59.33
+"Brasil","2013",62.09
+"Brasil","2014",63.79
+"Brasil","2015",62.02
+"Brasil","2016",64.42
+"Brasil","2017",64.51
+"Brasil","2018",59.12
+"Brasil","2019",57.93
+"Brasil","2020",74.69
+"Brasil","2021",117.4
+"Brasil","2022",57.73
+"Brasil","2023",55.29
+"Brasil","2024",59.68
