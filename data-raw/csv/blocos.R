@@ -192,7 +192,7 @@ bloco4_profissional <- bloco4_profissional |>
 
 ## Para o bloco 5 ---------------------------------------------------------
 ### Lendo o arquivo contendo todos os indicadores
-bloco5_aux <- read.csv("data-raw/csv/indicadores_bloco5_condicao_de_nascimento_2012_2024.csv") |>
+bloco5_aux <- read.csv("data-raw/csv/indicadores_bloco5_condicao_de_nascimento_2012_2025.csv") |>
   janitor::clean_names()
 
 ### Adicionando as informações dos municípios
@@ -204,7 +204,7 @@ bloco5 <- bloco5 |>
   )
 
 ### Lendo o arquivo com as informações para a construção da tabela de malformações
-malformacao_aux <- read.csv("data-raw/csv/malformacao_2012_2024.csv", sep = ';') |>
+malformacao_aux <- read.csv("data-raw/csv/malformacao_2012_2025.csv", sep = ';') |>
   janitor::clean_names() |>
   dplyr::arrange(codmunres, ano) |>
   dplyr::filter(codmunres %in% tabela_aux_municipios$codmunres) |>
