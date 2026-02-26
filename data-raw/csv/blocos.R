@@ -116,7 +116,7 @@ bloco3 <- bloco3 |>
 
 ## Para o bloco 4 (aba de grupos de Robson) -------------------------------
 ### Lendo o arquivo contendo todos os indicadores
-bloco4_aux <- read.csv("data-raw/csv/indicadores_bloco4_assistencia_ao_parto_2012-2024.csv") |>
+bloco4_aux <- read.csv("data-raw/csv/indicadores_bloco4_assistencia_ao_parto_2012-2025.csv") |>
   janitor::clean_names()
 
 ### Adicionando as informações dos municípios
@@ -130,10 +130,10 @@ bloco4 <- bloco4 |>
 
 ## Para o bloco 4 (aba de deslocamento para o parto) ----------------------
 ### Lendo os arquivos contendo todos os indicadores para municípios
-bloco4_deslocamento_muni_aux <- read.csv("data-raw/csv/indicadores_bloco4_deslocamento_parto_municipio_2012-2024.csv") |>
+bloco4_deslocamento_muni_aux <- read.csv("data-raw/csv/indicadores_bloco4_deslocamento_parto_municipio_2012-2025.csv") |>
   janitor::clean_names()
 
-bloco4_deslocamento_macrorregiao_aux <- read.csv("data-raw/csv/indicador_deslocamento_1500_2012_2024.csv")
+bloco4_deslocamento_macrorregiao_aux <- read.csv("data-raw/csv/indicador_deslocamento_1500_2012_2025.csv")
 
 ### Adicionando as informações dos municípios
 bloco4_deslocamento_muni <- dplyr::left_join(bloco4_deslocamento_muni_aux, tabela_aux_municipios, by = "codmunres")
@@ -163,7 +163,7 @@ bloco4_deslocamento_uf_aux1 <- read.csv("data-raw/csv/indicadores_bloco4_desloca
     km_partos_fora_macrorregiao_baixa_complexidade = as.numeric(km_partos_fora_macrorregiao_baixa_complexidade)
   )
 
-bloco4_deslocamento_uf_aux2 <- read.csv("data-raw/csv/indicadores_bloco4_deslocamento_parto_UF_2012-2024.csv") |>
+bloco4_deslocamento_uf_aux2 <- read.csv("data-raw/csv/indicadores_bloco4_deslocamento_parto_UF_2012-2025.csv") |>
   janitor::clean_names() |> dplyr::filter(ano > 2020)
 
 bloco4_deslocamento_uf_aux <- rbind(bloco4_deslocamento_uf_aux2, bloco4_deslocamento_uf_aux1)
@@ -179,7 +179,7 @@ bloco4_deslocamento_uf <- dplyr::left_join(
 
 ## Para o bloco 4 (aba de local e profissional de assistência) ------------
 ### Lendo o arquivo contendo todos os indicadores para municípios
-bloco4_profissional_aux <- read.csv("data-raw/csv/indicadores_bloco4_profissional_2012-2024.csv")
+bloco4_profissional_aux <- read.csv("data-raw/csv/indicadores_bloco4_profissional_2012-2025.csv")
 
 ### Adicionando as informações dos municípios
 bloco4_profissional <- dplyr::right_join(bloco4_profissional_aux, tabela_aux_municipios, by = "codmunres")
@@ -192,7 +192,7 @@ bloco4_profissional <- bloco4_profissional |>
 
 ## Para o bloco 5 ---------------------------------------------------------
 ### Lendo o arquivo contendo todos os indicadores
-bloco5_aux <- read.csv("data-raw/csv/indicadores_bloco5_condicao_de_nascimento_2012_2024.csv") |>
+bloco5_aux <- read.csv("data-raw/csv/indicadores_bloco5_condicao_de_nascimento_2012_2025.csv") |>
   janitor::clean_names()
 
 ### Adicionando as informações dos municípios
@@ -204,7 +204,7 @@ bloco5 <- bloco5 |>
   )
 
 ### Lendo o arquivo com as informações para a construção da tabela de malformações
-malformacao_aux <- read.csv("data-raw/csv/malformacao_2012_2024.csv", sep = ';') |>
+malformacao_aux <- read.csv("data-raw/csv/malformacao_2012_2025.csv", sep = ';') |>
   janitor::clean_names() |>
   dplyr::arrange(codmunres, ano) |>
   dplyr::filter(codmunres %in% tabela_aux_municipios$codmunres) |>

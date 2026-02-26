@@ -1,7 +1,6 @@
-################################
-#################### microdatasus
-################################
-
+#####
+## CASO O CÓDIGO NÃO FUNCIONE, VERIFIQUE AS VERSÕES DO R, RSTUDIO E PACOTES
+#####
 library(tidyverse)
 library(microdatasus)
 library(data.table)
@@ -9,73 +8,52 @@ library(readr)
 
 options(timeout = 6000)
 
-# sinasc12 <- microdatasus::fetch_datasus(year_start = 2012, year_end = 2012, information_system = 'SINASC', vars = c("CODMUNRES", "PESO", "APGAR5", "IDANOMAL", "CODANOMAL"))
-#
-# sinasc13 <- microdatasus::fetch_datasus(year_start = 2013, year_end = 2013, information_system = 'SINASC', vars = c("CODMUNRES", "PESO", "APGAR5", "IDANOMAL", "CODANOMAL"))
-#
-# sinasc14 <- microdatasus::fetch_datasus(year_start = 2014, year_end = 2014, information_system = 'SINASC', vars = c("CODMUNRES", "PESO", "APGAR5", "IDANOMAL", "CODANOMAL"))
-#
-# sinasc15 <- microdatasus::fetch_datasus(year_start = 2015, year_end = 2015, information_system = 'SINASC', vars = c("CODMUNRES", "PESO", "APGAR5", "IDANOMAL", "CODANOMAL"))
-#
-# sinasc16 <- microdatasus::fetch_datasus(year_start = 2016, year_end = 2016, information_system = 'SINASC', vars = c("CODMUNRES", "PESO", "APGAR5", "IDANOMAL", "CODANOMAL"))
-#
-# sinasc17 <- microdatasus::fetch_datasus(year_start = 2017, year_end = 2017, information_system = 'SINASC', vars = c("CODMUNRES", "PESO", "APGAR5", "IDANOMAL", "CODANOMAL"))
-#
-# sinasc18 <- microdatasus::fetch_datasus(year_start = 2018, year_end = 2018, information_system = 'SINASC', vars = c("CODMUNRES", "PESO", "APGAR5", "IDANOMAL", "CODANOMAL"))
-#
-# sinasc19 <- microdatasus::fetch_datasus(year_start = 2019, year_end = 2019, information_system = 'SINASC', vars = c("CODMUNRES", "PESO", "APGAR5", "IDANOMAL", "CODANOMAL"))
-#
-# sinasc20 <- microdatasus::fetch_datasus(year_start = 2020, year_end = 2020, information_system = 'SINASC', vars = c("CODMUNRES", "PESO", "APGAR5", "IDANOMAL", "CODANOMAL"))
-#
-# sinasc21 <- microdatasus::fetch_datasus(year_start = 2021, year_end = 2021, information_system = 'SINASC', vars = c("CODMUNRES", "PESO", "APGAR5", "IDANOMAL", "CODANOMAL"))
-#
-# sinasc22 <- microdatasus::fetch_datasus(year_start = 2022, year_end = 2022, information_system = 'SINASC', vars = c("CODMUNRES", "PESO", "APGAR5", "IDANOMAL", "CODANOMAL"))
+df_sinasc_consolidados <- list()
 
-sinasc23 <- microdatasus::fetch_datasus(year_start = 2023, year_end = 2023, information_system = 'SINASC', vars = c("CODMUNRES", "PESO", "APGAR5", "IDANOMAL", "CODANOMAL"))
+# para atualizações futuras, alterar o ano final de acordo com o que for possível carregar via microdatasus
+anos <- 2012:2024
 
-# dados consolidados do SINASC 2024 que não esta no microdatasus
+for (i in anos){
+  a <- fetch_datasus(
+    year_start = i,
+    year_end = i,
+    vars = c("CODMUNRES", "DTNASC", "PESO", "APGAR5", "IDANOMAL", "CODANOMAL"),
+    information_system = "SINASC"
+  )
 
-sinasc24 <- fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2024.csv", sep = ";")
-sinasc24 <- sinasc24 |>
-  select(CODMUNRES, PESO, APGAR5, IDANOMAL, CODANOMAL) |>
+  df_sinasc_consolidados[[i-2011]] <- a
+
+  print(paste0("Ano ", i, " finalizado"))
+}
+
+rm(a)
+
+df_sinasc_consolidados <- bind_rows(df_sinasc_consolidados)
+
+# leitura de dados preliminares ou consolidados que não esta no microdatasus
+# para atualizações futuras, alterar o ano na URL abaixo
+df_sinasc_preliminares <- fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2025_csv.zip",
+                                sep = ";") |>
+  select(CODMUNRES, DTNASC, PESO, APGAR5, IDANOMAL, CODANOMAL) |>
   mutate(CODANOMAL = ifelse(CODANOMAL == "", NA, CODANOMAL))
 
-sinasc24[, 1:5] <- lapply(sinasc24[, 1:5], as.character)
+df_sinasc_preliminares[,1:length(df_sinasc_preliminares)] <- lapply(df_sinasc_preliminares[,1:length(df_sinasc_preliminares)], as.character)
 
-## criando coluna de anos
-# sinasc12$Ano <- 2012
-# sinasc13$Ano <- 2013
-# sinasc14$Ano <- 2014
-# sinasc15$Ano <- 2015
-# sinasc16$Ano <- 2016
-# sinasc17$Ano <- 2017
-# sinasc18$Ano <- 2018
-# sinasc18$Ano <- 2018
-# sinasc19$Ano <- 2019
-# sinasc20$Ano <- 2020
-# sinasc21$Ano <- 2021
-# sinasc22$Ano <- 2022
-sinasc23$Ano <- 2023
-sinasc24$Ano <- 2024
-
-
-sinasc_microdatasus <- dplyr::bind_rows(#sinasc12, sinasc13, sinasc14, sinasc15, sinasc16, sinasc17, sinasc18, sinasc19, sinasc20, sinasc21, sinasc22,
-  sinasc23, sinasc24)
-
-
-#write.table(sinasc_microdatasus, 'data-raw/csv/bruto_sinasc_microdatasus_2012_2023.csv', sep = ";", dec = ".", row.names = FALSE)
-
-#### agrupando
-
-#sinasc_microdatasus <- read.csv('data-raw/csv/bruto_sinasc_microdatasus_2012_2023.csv', sep = ";")
-
-dados <- sinasc_microdatasus |>
+df_sinasc_preliminares <- df_sinasc_preliminares |>
+  mutate(
+    Ano = as.numeric(substr(DTNASC, nchar(DTNASC) - 3, nchar(DTNASC)))) |>
   group_by(CODMUNRES, Ano, PESO, APGAR5, IDANOMAL, CODANOMAL) |>
   summarise(Nascimentos = n())
 
-#### salvar base agrupada
-#write.table(sinasc_microdatasus, 'data-raw/csv/sinasc_microdatasus_2012_2023.csv', sep = ";", dec = ".", row.names = FALSE)
+#### agrupando
 
+df_sinasc_consolidados <- df_sinasc_consolidados |>
+  mutate(
+  Ano = as.numeric(substr(DTNASC, nchar(DTNASC) - 3, nchar(DTNASC)))) |>
+  group_by(CODMUNRES, Ano, PESO, APGAR5, IDANOMAL, CODANOMAL) |>
+  summarise(Nascimentos = n())
+
+df_sinasc <- full_join(df_sinasc_consolidados, df_sinasc_preliminares)
 
 ###################
 # TRATAMENTO DOS DADOS PARA CRIAÇÃO DAS TABELAS
@@ -89,16 +67,16 @@ tabela_aux_municipios <- tabela_aux_municipios[,c(1, 2, 8)] |>
 
 tabela_aux_municipios$CODMUNRES <- as.character(tabela_aux_municipios$CODMUNRES)
 
-dados <- left_join(dados, tabela_aux_municipios)
+df_sinasc <- left_join(df_sinasc, tabela_aux_municipios)
 
-dados <- dados |>
+df_sinasc <- df_sinasc |>
   filter(!is.na(municipio))
 
 
 ########## asfixia 1 ##########
 ## Asfixia 1
 
-asfixia1 <- dados |>
+asfixia1 <- df_sinasc |>
   filter(PESO >= 2500 & ((IDANOMAL == 2) | ((IDANOMAL == '' | is.na(IDANOMAL)) &
                                               (CODANOMAL == '' | is.na(CODANOMAL)))))
 
@@ -131,7 +109,6 @@ asfixia1_final <- left_join(asfixia14, asfixia14_1,
 asfixia1_final <- asfixia1_final %>%
   mutate(nascidos_vivos_asfixia1  = ifelse(is.na(nascidos_vivos_asfixia1), 0, nascidos_vivos_asfixia1))
 
-
 asfixia <- asfixia1_final |>
   group_by(CODMUNRES, Ano) |>
   summarise(nascidos_vivos_asfixia1 = sum(nascidos_vivos_asfixia1),
@@ -140,26 +117,21 @@ asfixia <- asfixia1_final |>
   rename(codmunres = CODMUNRES,
          ano = Ano)
 
-asfixia_antigo <- read_delim("data-raw/csv/asfixia_2012_2024(antigo).csv",
-                                delim = ";", escape_double = FALSE, trim_ws = TRUE) |>
-  filter(ano <= 2022)
+asfixia <- asfixia |>
+  mutate(codmunres = as.numeric(codmunres)) |>
+  arrange(codmunres)
 
-asfixia$codmunres <- as.numeric(asfixia$codmunres)
-
-asfixia_novo <- full_join(asfixia_antigo, asfixia)
-
-asfixia_novo <- asfixia_novo %>% arrange(codmunres)
-
-write.csv(asfixia_novo, "data-raw/csv/asfixia1_2012_2024.csv")
+write.csv(asfixia, "data-raw/csv/asfixia1_2012_2025.csv")
 
 ###################### malformação
 
-malformacao <- dados
+malformacao <- df_sinasc
 
 codigos_anomalia <- str_extract_all(malformacao$CODANOMAL, "[A-Z]\\d{3}|[A-Z]\\d{2}X|[A-Z]\\d{2}")
 
 # Determine o número máximo de códigos em uma observação
 max_codigos <- max(sapply(codigos_anomalia, length))
+
 # Crie variáveis para cada código de anomalia (neste caso temos no máximo 5)
 for (i in 1:max_codigos) {
   col_name <- paste0("codigo_", i)
@@ -193,6 +165,7 @@ codigos <- c('Q000', 'Q001', 'Q002',
 filtro_inicio <- function(variavel, codigos) {
   grepl(paste(codigos, collapse = "|"), variavel)
 }
+
 filtro_malformacao <- malformacao %>%
   filter(str_detect(codigo_1, paste(codigos, collapse = "|")) |
            str_detect(codigo_2, paste(codigos, collapse = "|")) |
@@ -204,6 +177,7 @@ filtro_malformacao <- filtro_malformacao |>
   filter(str_detect(valor, paste0("^(", paste(codigos, collapse = "|"), ")")))
 codigos <- c("Q01", "Q05", "Q02", "Q20", "Q21", "Q22", "Q23", "Q24", "Q25", "Q26", "Q27", "Q28", "Q35", "Q36", "Q37", "Q54", "Q56", "Q66", "Q69", "Q71", "Q72", "Q73", "Q90")
 filtro_malformacao$codigo_cid <- ifelse(substr(filtro_malformacao$valor, 1, 3) %in% codigos, substr(filtro_malformacao$valor, 1, 3), filtro_malformacao$valor)
+
 # Vetores com os códigos para cada grupo de anomalias congênitas
 defeitos_de_tubo_neural <- c('Q000', 'Q001', 'Q002',
                              'Q01X','Q01', 'Q010', 'Q011', 'Q012', 'Q013', 'Q014', 'Q015', 'Q016', 'Q017', 'Q018', 'Q019',
@@ -370,21 +344,15 @@ malformacao <- malformacao |>
 
 malformacao <- malformacao[,-c(1,2,3)]
 
-malformacao_antigo <- read_delim("data-raw/csv/malformacao_2012_2024.csv",
-                                    delim = ";", escape_double = FALSE, trim_ws = TRUE) |>
-  filter(ano <= 2022)
-
 malformacao$codmunres <- as.numeric(malformacao$codmunres)
 
-malformacao_novo <- full_join(malformacao_antigo, malformacao)
-
-write.table(malformacao_novo, 'data-raw/csv/malformacao_2012_2024.csv', sep = ";", dec = ".", row.names = FALSE)
+write.table(malformacao, 'data-raw/csv/malformacao_2012_2025.csv', sep = ";", dec = ".", row.names = FALSE)
 
 
 ###################
 
 
-asfixia_1 <- read_csv("data-raw/csv/asfixia1_2012_2024.csv")
+asfixia_1 <- read_csv("data-raw/csv/asfixia1_2012_2025.csv")
 
 
 df_bloco8 <- asfixia_1 |>
@@ -393,8 +361,4 @@ df_bloco8 <- asfixia_1 |>
             total_nascidos = sum(total_nascidos)) |>
   ungroup()
 
-write.table(df_bloco8, 'data-raw/csv/asfixia_2012_2024.csv', sep = ";", dec = ".", row.names = FALSE)
-
-
-
-
+write.table(df_bloco8, 'data-raw/csv/asfixia_2012_2025.csv', sep = ";", dec = ".", row.names = FALSE)
