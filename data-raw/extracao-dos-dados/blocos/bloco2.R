@@ -27,8 +27,8 @@ codigos_municipios <- read.csv(
 
 ## Criando um data.frame auxiliar que possui uma linha para cada combinação de município e ano
 df_aux_municipios <- data.frame(
-  codmunres = rep(codigos_municipios, each = length(2012:2024)),
-  ano = 2012:2024
+  codmunres = rep(codigos_municipios, each = length(2023:2025)),
+  ano = 2023:2025
 )
 
 ## Importando funções que baixam dados do Tabnet
@@ -37,8 +37,8 @@ source("funcoes_auxiliares.R")
 # Para as variáveis provenientes do SINASC -----------------------------------
 ## Baixando os dados consolidados do SINASC e selecionando as variáveis de interesse
 df_sinasc_consolidados <- fetch_datasus(
-  year_start = 2012,
-  year_end = 2023,
+  year_start = 2023,
+  year_end = 2024,
   vars = c("CODMUNRES", "DTNASC", "IDADEMAE", "QTDPARTNOR", "QTDPARTCES"),
   information_system = "SINASC"
 )
@@ -47,7 +47,7 @@ df_sinasc_consolidados <- fetch_datasus(
 options(timeout = 99999)
 
 df_sinasc_preliminares <- fread(
-  "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2024.csv",
+  "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2025_csv.zip",
   sep = ";"
 ) |>
   select(CODMUNRES, DTNASC, IDADEMAE, QTDPARTNOR, QTDPARTCES) |>
@@ -65,7 +65,7 @@ df_sinasc <- full_join(df_sinasc_consolidados, df_sinasc_preliminares)
 rm(df_sinasc_consolidados, df_sinasc_preliminares)
 
 ## Transformando algumas variáveis e criando as variáveis necessárias p/ o cálculo dos indicadores
-df_bloco2_sinasc <- df_sinasc |>
+df_bloco2_sinasc_preliminares <- df_sinasc_preliminares |>
   mutate(
     ano = as.numeric(substr(DTNASC, nchar(DTNASC) - 3, nchar(DTNASC))),
     IDADEMAE = as.numeric(IDADEMAE),
@@ -127,9 +127,9 @@ df_bloco2_sinasc <- df_sinasc |>
   clean_names() |>
   group_by(codmunres, ano) |>
   summarise_at(vars(-group_cols()), sum) |>
-  ungroup() |>
+  ungroup() #|>
   # Juntando com a base aulixiar de municípios
-  right_join(df_aux_municipios)
+  #right_join(df_aux_municipios)
 
 ## Substituindo todos os NAs, gerados após o right_join, por 0
 df_bloco2_sinasc[is.na(df_bloco2_sinasc)] <- 0
@@ -139,8 +139,15 @@ rm(df_sinasc)
 # Para as variáveis provenientes do Tabnet -----------------------------------
 ## Estimativas populacionais de mulheres de 10 a 14 anos ---------------------
 ### Baixando os dados de 2012 a 2024
+
+## Criando um data.frame auxiliar que possui uma linha para cada combinação de município e ano
+df_aux_municipios <- data.frame(
+  codmunres = rep(codigos_municipios, each = length(2023:2024)),
+  ano = 2023:2024
+)
+
 df_est_pop_fem_10_14 <- est_pop_tabnet(
-  periodo = 12:24,
+  periodo = 23:24,
   idade_min = 10,
   idade_max = 14
 ) |>
@@ -156,7 +163,7 @@ df_est_pop_fem_10_14[is.na(df_est_pop_fem_10_14)] <- 0
 ## Estimativas populacionais de mulheres de 15 a 19 anos ---------------------
 ### Baixando os dados de 2012 a 2024
 df_est_pop_fem_15_19 <- est_pop_tabnet(
-  periodo = 12:24,
+  periodo = 23:24,
   idade_min = 15,
   idade_max = 19
 ) |>
@@ -172,7 +179,7 @@ df_est_pop_fem_15_19[is.na(df_est_pop_fem_15_19)] <- 0
 ## Estimativas populacionais de mulheres de 20 a 29 anos ---------------------
 ### Baixando os dados de 2012 a 2024
 df_est_pop_fem_20_29 <- est_pop_tabnet(
-  periodo = 12:24,
+  periodo = 23:24,
   idade_min = 20,
   idade_max = 29
 ) |>
@@ -188,7 +195,7 @@ df_est_pop_fem_20_29[is.na(df_est_pop_fem_20_29)] <- 0
 ## Estimativas populacionais de mulheres de 30 a 39 anos ---------------------
 ### Baixando os dados de 2012 a 2024
 df_est_pop_fem_30_39 <- est_pop_tabnet(
-  periodo = 12:24,
+  periodo = 23:24,
   idade_min = 30,
   idade_max = 39
 ) |>
@@ -204,7 +211,7 @@ df_est_pop_fem_30_39[is.na(df_est_pop_fem_30_39)] <- 0
 ## Estimativas populacionais de mulheres de 40 a 49 anos ---------------------
 ### Baixando os dados de 2012 a 2024
 df_est_pop_fem_40_49 <- est_pop_tabnet(
-  periodo = 12:24,
+  periodo = 23:24,
   idade_min = 40,
   idade_max = 49
 ) |>
@@ -220,7 +227,7 @@ df_est_pop_fem_40_49[is.na(df_est_pop_fem_40_49)] <- 0
 ## Estimativas populacionais de mulheres de 10 a 49 anos ---------------------
 ### Baixando os dados de 2012 a 2024
 df_est_pop_fem_10_49 <- est_pop_tabnet(
-  periodo = 12:24,
+  periodo = 23:24,
   idade_min = 10,
   idade_max = 49
 ) |>
@@ -245,7 +252,7 @@ df_bloco2_tabnet <- df_est_pop_fem_10_14 |>
 
 # Para os indicadores de aborto ----------------------------------------------
 ## Criando um vetor com os anos disponíveis
-anos_aborto <- c(2015:2023)
+anos_aborto <- c(2023:2024)
 
 ## Criando um vetor com as siglas de todos os estados do Brasil
 estados <- c(
@@ -370,12 +377,12 @@ cids_nao_aborto <- c(
 ## Para os dados da ANS -----------------------------------------------------
 ### Criando pastas temporárias para armazenar os arquivos baixados
 dir.create(
-  "databases_auxiliares/ANS/arquivos_base_consolidada",
+  "databases_auxiliares/ANS/arquivos_base_consolidada-2026",
   showWarnings = FALSE,
   recursive = TRUE
 )
 dir.create(
-  "databases_auxiliares/ANS/arquivos_base_detalhada",
+  "databases_auxiliares/ANS/arquivos_base_detalhada-2026",
   showWarnings = FALSE,
   recursive = TRUE
 )
@@ -392,7 +399,7 @@ for (ano in anos_aborto) {
       mes_str <- sprintf("%02d", mes)
       url <- paste0(base_url, uf, "/", uf, "_", ano, mes_str, "_HOSP_CONS.zip")
       filename <- paste0(
-        "databases_auxiliares/ANS/arquivos_base_consolidada/",
+        "databases_auxiliares/ANS/arquivos_base_consolidada-2026/",
         uf,
         "_",
         ano,
@@ -402,7 +409,7 @@ for (ano in anos_aborto) {
       download.file(url, filename)
       unzip(
         filename,
-        exdir = "databases_auxiliares/ANS/arquivos_base_consolidada"
+        exdir = "databases_auxiliares/ANS/arquivos_base_consolidada-2026"
       )
       file.remove(filename)
     }
@@ -411,7 +418,7 @@ for (ano in anos_aborto) {
 
 ### Criando uma lista com o nome de todos os arquivos baixados
 arquivos <- list.files(
-  "databases_auxiliares/ANS/arquivos_base_consolidada/",
+  "databases_auxiliares/ANS/arquivos_base_consolidada-2026/",
   full.names = TRUE,
   pattern = "\\.csv",
   recursive = TRUE
@@ -421,8 +428,17 @@ arquivos <- list.files(
 dados_concatenados_hosp <- data.frame()
 
 for (arquivo in arquivos) {
+  message("Lendo: ", basename(arquivo))
   # Lendo o arquivo CSV
-  df <- read_delim(arquivo, delim = ";", escape_double = FALSE, trim_ws = TRUE)
+  df <- read_delim(
+    arquivo,
+    delim = ";",
+    escape_double = FALSE,
+    trim_ws = TRUE,
+    col_types = cols(
+      ANO_MES_EVENTO = col_character()
+    )
+  )
 
   # Extraindo a UF a partir do nome do arquivo
   uf <- gsub("^.+/([A-Z]+)_\\d{6}_HOSP_CONS\\.csv", "\\1", arquivo)
@@ -450,9 +466,11 @@ for (arquivo in arquivos) {
 ### Exportando os dados concatenados da base consolidada
 write.csv(
   dados_concatenados_hosp,
-  "databases_auxiliares/ANS/arquivos_base_consolidada/dados_ANS_hosp_2015_2022.csv",
+  "databases_auxiliares/ANS/arquivos_base_consolidada-2026/dados_ANS_hosp_2023_2024.csv",
   row.names = FALSE
 )
+
+## aqui
 
 ### Filtrando pelas faixas etárias de interesse e pelas indicadoras de aborto ou não aborto
 dados_concatenados_hosp_filtrados <- dados_concatenados_hosp |>
@@ -481,7 +499,7 @@ dados_concatenados_hosp_filtrados <- dados_concatenados_hosp |>
 ### Exportando os dados da base consolidada filtrados
 write.csv(
   dados_concatenados_hosp_filtrados,
-  "databases_auxiliares/ANS/arquivos_base_consolidada/dados_ANS_hosp_filtrados_2015_2022.csv",
+  "databases_auxiliares/ANS/arquivos_base_consolidada-2026/dados_ANS_hosp_filtrados_2023_2024.csv",
   row.names = FALSE
 )
 
@@ -501,7 +519,7 @@ for (ano in anos_aborto) {
       mes_str <- sprintf("%02d", mes)
       url <- paste0(base_url, uf, "/", uf, "_", ano, mes_str, "_HOSP_DET.zip")
       filename <- paste0(
-        "databases_auxiliares/ANS/arquivos_base_detalhada/",
+        "databases_auxiliares/ANS/arquivos_base_detalhada-2026/",
         uf,
         "_",
         ano,
@@ -511,7 +529,7 @@ for (ano in anos_aborto) {
       download.file(url, filename)
       unzip(
         filename,
-        exdir = "databases_auxiliares/ANS/arquivos_base_detalhada"
+        exdir = "databases_auxiliares/ANS/arquivos_base_detalhada-2026"
       )
       file.remove(filename)
     }
@@ -526,7 +544,7 @@ for (ano in anos_aborto) {
   for (uf in estados) {
     # Criando uma lista com o nome de todos os arquivos baixados
     arquivos <- list.files(
-      "databases_auxiliares/ANS/arquivos_base_detalhada",
+      "databases_auxiliares/ANS/arquivos_base_detalhada-2026",
       full.names = TRUE,
       pattern = paste0("^", uf, ".*", ano, ".*\\.csv$"),
       recursive = TRUE
@@ -536,12 +554,16 @@ for (ano in anos_aborto) {
     dados_det_uf <- data.frame()
 
     for (arquivo in arquivos) {
+      message("Lendo: ", basename(arquivo))
       # Lendo o arquivo CSV
       df <- read_delim(
         arquivo,
         delim = ";",
         escape_double = FALSE,
-        trim_ws = TRUE
+        trim_ws = TRUE,
+        col_types = cols(
+          ANO_MES_EVENTO = col_character()
+        )
       )
       # Extraindo a unidade federativa a partir do nome do arquivo
       uf <- gsub("^.+/([A-Z]+)_\\d{6}_HOSP_DET\\.csv", "\\1", arquivo)
@@ -573,7 +595,7 @@ for (ano in anos_aborto) {
     }
 
     # Juntando com o restante dos dados
-    dados_concatenados_hosp_det_ano <- rbind(
+    dados_concatenados_hosp_det_ano <- bind_rows(
       dados_concatenados_hosp_det_ano,
       dados_det_uf
     )
@@ -587,7 +609,7 @@ for (ano in anos_aborto) {
   write.csv(
     dados_concatenados_hosp_det_ano,
     paste0(
-      "databases_auxiliares/ANS/arquivos_base_detalhada/dados_ANS_hosp_det_",
+      "databases_auxiliares/ANS/arquivos_base_detalhada-2026/dados_ANS_hosp_det_",
       ano,
       ".csv"
     ),
@@ -602,7 +624,7 @@ for (ano in anos_aborto) {
 ### Fazendo todas as manipulações necessárias
 #### Lendo o arquivo com os dados concatenados da base consolidada e criando outra variável de faixa etária
 dados_concatenados_hosp <- fread(
-  "databases_auxiliares/ANS/arquivos_base_consolidada/dados_ANS_hosp_2015_2022.csv"
+  "databases_auxiliares/ANS/arquivos_base_consolidada-2026/dados_ANS_hosp_2023_2024.csv"
 ) |>
   mutate(
     fet = ifelse(
@@ -614,7 +636,7 @@ dados_concatenados_hosp <- fread(
 
 #### Lendo o arquivo com os dados concatenados da base consolidada filtrados e excluindo os casos em que cid_nao_aborto == 1
 dados_filtrados_cid <- fread(
-  "databases_auxiliares/ANS/arquivos_base_consolidada/dados_ANS_hosp_filtrados_2015_2022.csv"
+  "databases_auxiliares/ANS/arquivos_base_consolidada-2026/dados_ANS_hosp_filtrados_2023_2024.csv"
 ) |>
   filter(cid_nao_aborto == 0 | is.na(cid_nao_aborto)) |>
   select(
@@ -632,11 +654,11 @@ dados_filtrados_cid <- fread(
 #### Criando o data.frame que guardará a base completa
 df_numerador_aborto_ans <- data.frame()
 
-for (year in anos) {
+for (year in anos_aborto) {
   # Lendo o arquivo com os dados concatenados das UFs da base detalhada para o dado ano
   dados_concatenados_hosp_det_ano <- fread(
     paste0(
-      "databases_auxiliares/ANS/arquivos_base_detalhada/dados_ANS_hosp_det_",
+      "databases_auxiliares/ANS/arquivos_base_detalhada-2026/dados_ANS_hosp_det_",
       year,
       ".csv"
     )
@@ -871,6 +893,7 @@ for (ano in anos_aborto) {
   gc()
 }
 
+
 ### Juntando com a base aulixiar de municípios
 df_numerador_aborto_sus <- left_join(
   df_aux_municipios,
@@ -894,9 +917,20 @@ df_numerador_aborto <- full_join(
 ## Para os denominadores -----------------------------------------------------
 ### Calculando as estimativas de mulheres com plano de saúde em cada faixa etária
 df_denominador_aborto <- left_join(
-  df_bloco2_sinasc |> mutate(codmunres = as.character(codmunres)),
+  df_bloco2_sinasc1 |> mutate(codmunres = as.character(codmunres)),
   df_bloco2_tabnet
 ) |>
+
+  mutate(
+    populacao_feminina_10_a_19 =
+      populacao_feminina_10_a_14 +
+      populacao_feminina_15_a_19,
+
+    total_de_nascidos_vivos_10_a_19 =
+      total_de_nascidos_vivos_10_a_14 +
+      total_de_nascidos_vivos_15_a_19
+  ) |>
+
   mutate(
     pop_feminina_10_a_19_ans = floor(populacao_feminina_10_a_19 * 0.179),
     pop_feminina_20_a_29_ans = floor(populacao_feminina_20_a_29 * 0.26),
@@ -944,7 +978,7 @@ df_bloco2_aborto <- full_join(df_numerador_aborto, df_denominador_aborto)
 # Juntando todos os dados baixados -------------------------------------------
 df_bloco2 <- full_join(
   full_join(
-    df_bloco2_sinasc |> mutate(codmunres = as.character(codmunres)),
+    df_bloco2_sinasc1 |> mutate(codmunres = as.character(codmunres)),
     df_bloco2_tabnet
   ),
   df_bloco2_aborto |> mutate(codmunres = as.character(codmunres))
@@ -953,7 +987,7 @@ df_bloco2 <- full_join(
 
 # Verificando se os dados novos e antigos estão batendo ----------------------
 df_bloco2_antigo <- read_delim(
-  "databases_auxiliares/indicadores_bloco2_planejamento_reprodutivo_SUS_ANS_2012_2020.csv",
+  "databases_auxiliares/indicadores_bloco2_planejamento_reprodutivo_SUS_ANS_2012_2023.csv",
   delim = ";",
   escape_double = FALSE,
   trim_ws = TRUE
@@ -961,13 +995,15 @@ df_bloco2_antigo <- read_delim(
   clean_names() |>
   filter(codmunres %in% codigos_municipios)
 
-sum(df_bloco2 |> filter(ano < 2021) |> pull(total_de_nascidos_vivos)) -
+sum(df_bloco2 |> filter(ano < 2025) |> pull(total_de_nascidos_vivos)) -
   sum(df_bloco2_antigo$total_de_nascidos_vivos)
-sum(df_bloco2 |> filter(ano < 2021) |> pull(nvm_menor_que_20)) -
+
+sum(df_bloco2 |> filter(ano < 2025) |> pull(nvm_menor_que_20)) -
   sum(df_bloco2_antigo$nvm_menor_que_20)
+
 sum(
   df_bloco2 |>
-    filter(ano < 2021) |>
+    filter(ano < 2025) |>
     pull(mulheres_com_mais_de_tres_partos_anteriores)
 ) -
   sum(df_bloco2_antigo$mulheres_com_mais_de_tres_partos_anteriores)
@@ -981,7 +1017,7 @@ setwd(diretorio_original)
 
 # Salvando a base de dados final ======---------------------------------------
 write.csv(
-  df_bloco2,
-  "data-raw/csv/indicadores_bloco2_planejamento_reprodutivo_SUS_ANS_2012_2024.csv",
+  base_final_2012_2025,
+  "data-raw/csv/indicadores_bloco2_planejamento_reprodutivo_SUS_ANS_2012_2025.csv",
   row.names = FALSE
 )
