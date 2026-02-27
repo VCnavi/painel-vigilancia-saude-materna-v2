@@ -8,6 +8,16 @@ library(data.table)
 library(future)
 library(future.apply)
 library(readxl)
+library(glue)
+
+# Inserir informações:
+# Todos os anos a serem baixados
+anos <- c(2023:2025)
+# Ano baixado pelo opendatasus
+ano_opendatasus <- 2025
+# Links para o ano baixado pelo opendatasus
+link_opendatasus_sim <- "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/csv/DO25OPEN_csv.zip"
+link_opendatasus_sinasc <- "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2025_csv.zip"
 
 # Baixando os dados do SINASC (com paralelização) -------------------------
 ## Criando o planejamento dos futures
@@ -49,17 +59,17 @@ processa_ano <- function(ano) {
   # Criando uma função genérica para baixar dados pelo microdatasus
   baixa_dados <- function(ano, sistema, data_col, vars = NULL) {
     # Tratamento especial para os dados preliminares
-    if (ano == 2024) {
+    if (ano == ano_opendatasus) {
       switch(sistema,
              "SIM-DOINF" = {
-               fread_retry("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/DO24OPEN.csv") |>
+               fread_retry(link_opendatasus_sim) |>
                  mutate(ano = extrai_ano(.data[[data_col]])) |>
                  pre_processa_doinf()
              },
              "SINASC" = {
-               fread_retry("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2024.csv", sep = ";") |>
+               fread_retry(link_opendatasus_sinasc, sep = ";") |>
                  mutate(ano = extrai_ano(.data[[data_col]])) |>
-                 select(CODMUNRES, ano, PESO)
+                 select(CODMUNRES, ano, PESO, GESTACAO, SEMAGESTAC, APGAR5)
              }
       )
     } else {
@@ -73,7 +83,7 @@ processa_ano <- function(ano) {
         mutate(ano = extrai_ano(.data[[data_col]]))
 
       if (sistema == "SINASC") {
-        dados <- dados |> select(CODMUNRES, ano, PESO)
+        dados <- dados |> select(CODMUNRES, ano, PESO, GESTACAO, SEMAGESTAC, APGAR5)
       } else if (sistema == "SIM-DOINF") {
         dados <- pre_processa_doinf(dados)
       }
@@ -89,8 +99,6 @@ processa_ano <- function(ano) {
   )
 }
 
-## Criando um vetor com os anos a serem baixados
-anos <- 2012:2024
 
 ## Baixando todos os dados
 resultados <- future_lapply(anos, processa_ano)
@@ -100,7 +108,7 @@ df_sinasc <- rbindlist(lapply(resultados, `[[`, "sinasc"), fill = TRUE)
 
 ## Criando uma função para salvar os arquivos
 salva_csv_gz <- function(df, nome) {
-  path <- paste0("data-raw/extracao-dos-dados/blocos/databases_auxiliares/", nome, "_2012_2024.csv.gz")
+  path <- paste0("data-raw/extracao-dos-dados/blocos/databases_auxiliares/", nome, "_2023_2025.csv.gz")
   write.csv(df, gzfile(path), row.names = FALSE)
 }
 
@@ -109,7 +117,7 @@ salva_csv_gz(df_sinasc, "df_sinasc")
 
 # Para os indicadores de nascidos vivos com condições ameaçadoras à vida -----
 ## Lendo o arquivo com os nascimentos no período de 2012-2024
-df_sinasc <- fread("data-raw/extracao-dos-dados/blocos/databases_auxiliares/df_sinasc_2012_2024.csv.gz") |>
+df_sinasc <- fread("data-raw/extracao-dos-dados/blocos/databases_auxiliares/df_sinasc_2023_2025.csv.gz") |>
   mutate(CODMUNRES = as.character(CODMUNRES))
 
 ## Criando um objeto que recebe os códigos dos municípios que utilizamos no painel
@@ -118,7 +126,7 @@ codigos_municipios <- read.csv("data-raw/extracao-dos-dados/blocos/databases_aux
   as.character()
 
 ## Criando um data.frame auxiliar que possui uma linha para cada combinação de município e ano
-df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2012:2024)), ano = 2012:2024)
+df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2023:2025)), ano = 2023:2025)
 
 ## Criando variáveis necessárias
 df_indicadores_sinasc <- df_sinasc |>
@@ -181,7 +189,7 @@ df_nasc_ameacadoras <- df_sinasc |>
 
 # Para os indicadores provenientes do SIH ---------------------------------
 ## Criando um vetor com os anos considerados
-anos <- c(2012:2024)
+anos <- c(2023:2025)
 
 ## Criando um vetor com as siglas de todos os estados do Brasil
 estados <- c("AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
@@ -193,18 +201,23 @@ procedimentos_parto <- c("0310010012", "0310010039", "0310010047",
                          "0310010055", "0411010026", "0411010034",
                          "0411010042")
 
-## Baixando os dados do SIH-RD
+
+max_tentativas <- 5
+
 for (estado in estados) {
-  # Criando data.frames que guardarão as bases do estado
+
   df_sih_rd_menores_28_uf <- data.frame()
   df_sih_rd_partos_uf <- data.frame()
 
   for (ano in anos) {
 
-    erro_rd <- TRUE
-    while (erro_rd) {
-      erro_rd <- tryCatch({
-        # Baixando os dados do SIH-RD para o dado ano e UF
+    tentativa <- 0
+    sucesso <- FALSE
+
+    while (!sucesso && tentativa < max_tentativas) {
+      tentativa <- tentativa + 1
+
+      res <- tryCatch({
         df_sih_rd_aux <- fetch_datasus(
           year_start = ano,
           year_end = ano,
@@ -221,35 +234,58 @@ for (estado in estados) {
           )
         )
 
-        # Criando um data.frame que contém apenas as internações de menores de 28 dias
-        df_sih_rd_aux_menores_28 <- df_sih_rd_aux |>
-          mutate(idade_dias = as.numeric(as.Date(DT_INTER, format = "%Y%m%d") - as.Date(NASC, format = "%Y%m%d"))) |>
-          dplyr::filter(
-            idade_dias < 28
+        # Se veio NULL/vazio, força nova tentativa
+        if (is.null(df_sih_rd_aux) || nrow(df_sih_rd_aux) == 0) {
+          stop("fetch_datasus retornou NULL ou 0 linhas")
+        }
+
+        # Menores de 28 dias
+        df_menores <- df_sih_rd_aux %>%
+          mutate(
+            idade_dias = as.numeric(
+              as.Date(DT_INTER, format = "%Y%m%d") - as.Date(NASC, format = "%Y%m%d")
+            )
+          ) %>%
+          filter(!is.na(idade_dias), idade_dias < 28)
+
+        # Partos
+        df_partos <- df_sih_rd_aux %>%
+          filter(
+            (
+              (DIAG_PRINC >= "O32" & DIAG_PRINC <= "O36") |
+                (DIAG_PRINC >= "O60" & DIAG_PRINC <= "O69") |
+                (DIAG_PRINC >= "O75" & DIAG_PRINC <  "O76") |
+                (DIAG_PRINC >= "O80" & DIAG_PRINC <= "O84") |
+                (DIAG_PRINC == "P95") |
+                (PROC_REA %in% procedimentos_parto)
+            )
           )
 
-        # Criando um data.frame que contém apenas os partos
-        df_sih_rd_aux_partos <- df_sih_rd_aux |>
-          dplyr::filter(
-            ((DIAG_PRINC >= "O32" & DIAG_PRINC <= "O36") | (DIAG_PRINC >= "O60" & DIAG_PRINC <= "O69") |
-               (DIAG_PRINC >= "O75" & DIAG_PRINC < "O76") | (DIAG_PRINC >= "O80" & DIAG_PRINC <= "O84") |
-               DIAG_PRINC == "P95") | (PROC_REA %in% procedimentos_parto)
-          )
-
-        erro_rd <- FALSE
+        list(menores = df_menores, partos = df_partos)
       },
-      warning = function(cond) return(TRUE)
-      )
+      warning = function(w) {
+        message("Aviso (", estado, " ", ano, ", tentativa ", tentativa, "): ", conditionMessage(w))
+        NULL
+      },
+      error = function(e) {
+        message("Erro (", estado, " ", ano, ", tentativa ", tentativa, "): ", conditionMessage(e))
+        NULL
+      })
+
+      if (!is.null(res)) {
+        # juntando com anos anteriores
+        df_sih_rd_menores_28_uf <- bind_rows(df_sih_rd_menores_28_uf, res$menores)
+        df_sih_rd_partos_uf <- bind_rows(df_sih_rd_partos_uf, res$partos)
+        sucesso <- TRUE
+      } else {
+        Sys.sleep(3) # pequena pausa antes de tentar de novo
+      }
     }
 
-    # Juntando com os dados dos anos anteriores para a dada UF
-    df_sih_rd_menores_28_uf <- bind_rows(df_sih_rd_menores_28_uf, df_sih_rd_aux_menores_28)
-    df_sih_rd_partos_uf <- bind_rows(df_sih_rd_partos_uf, df_sih_rd_aux_partos)
+    if (!sucesso) {
+      message("Pulando ", estado, " - ", ano, " após ", max_tentativas, " tentativas sem sucesso.")
+    }
 
-
-    # Limpando a memória
-    rm(df_sih_rd_aux_menores_28,
-       df_sih_rd_aux_partos)
     gc()
   }
 
@@ -266,10 +302,11 @@ for (estado in estados) {
     row.names = FALSE
   )
 
-  # Limpando a memória
-  rm(df_sih_rd_uf)
+  # Limpando a memória (corrigido)
+  rm(df_sih_rd_menores_28_uf, df_sih_rd_partos_uf)
   gc()
 }
+
 
 ### Criando os data.frames que guardarão as bases finais
 df_sih_rd_menores_28 <- data.frame()
@@ -277,7 +314,7 @@ df_sih_rd_partos <- data.frame()
 
 for (estado in estados) {
   df_sih_rd_menores_28_aux <- fread(
-    glue("data-raw/extracao-dos-dados/blocos/databases_auxiliares/internacoes_menores_28_dias/SIH/{estado}_sih_rd_menores_28_dias_2024_2024.csv.gz"),
+    glue("data-raw/extracao-dos-dados/blocos/databases_auxiliares/internacoes_menores_28_dias/SIH/{estado}_sih_rd_menores_28_dias_2023_2025.csv.gz"),
     sep = ";"
   )
   df_sih_rd_menores_28 <- bind_rows(df_sih_rd_menores_28, df_sih_rd_menores_28_aux)
@@ -288,7 +325,7 @@ for (estado in estados) {
 
 for (estado in estados) {
   df_sih_rd_partos_aux <- fread(
-    glue("data-raw/extracao-dos-dados/blocos/databases_auxiliares/internacoes_menores_28_dias/SIH/{estado}_sih_rd_partos_2024_2024.csv.gz"),
+    glue("data-raw/extracao-dos-dados/blocos/databases_auxiliares/internacoes_menores_28_dias/SIH/{estado}_sih_rd_partos_2023_2025.csv.gz"),
     sep = ";"
   )
   df_sih_rd_partos <- bind_rows(df_sih_rd_partos, df_sih_rd_partos_aux)
@@ -327,7 +364,7 @@ diretorio_bases_brutas <- glue("{getwd()}/data-raw/extracao-dos-dados/blocos/dat
 setwd("data-raw/extracao-dos-dados/blocos/databases_auxiliares/internacoes_menores_28_dias/algorithm_episode_of_care/")
 
 #### Rodando o algoritmo em C++ na base de internações
-system(glue("./processaih {diretorio_bases_brutas}/BR_sih_rd_menores_28_dias_2024_2024.csv"))
+system(glue("./processaih {diretorio_bases_brutas}/BR_sih_rd_menores_28_dias_2023_2025.csv"))
 
 #### Voltando para o diretório original do projeto
 setwd(diretorio_original)
@@ -401,11 +438,10 @@ df_bloco7_sih_internacoes <- df_aih_internacoes_wide_macros |>
     values_fill = 0,
     names_prefix = "internacoes_"
   ) |>
-  right_join(data.frame(codmunres = rep(as.numeric(df_infos_municipios$codmunres), each = length(2012:2024)), ano = 2012:2024)) |>
-  arrange(codmunres, ano) |>
+  right_join(data.frame(codmunres = rep(as.numeric(df_infos_municipios$codmunres), each = length(2023:2025)), ano = 2023:2025)) |>
   mutate(across(.cols = -c(codmunres, ano, causabas), .fns = ~ replace_na(., 0))) |>
-  rowwise() |>
-  mutate(
+  group_by(codmunres, ano) |>
+  summarise(
     # Para o indicador de internações geral, os nomes das variáveis seguem o padrão "internacoes_local-do-parto_idade-do-bebe"
     internacoes_na_macro_7_a_27_dias = sum(c_across(contains("na_macro_7_a_27_dias"))),
     internacoes_fora_macro_7_a_27_dias = sum(c_across(contains("fora_macro_7_a_27_dias"))),
@@ -447,7 +483,7 @@ sum(df_bloco7_sih_internacoes$internacoes_geral_7_a_27_dias_internado_uti, df_bl
 setwd("data-raw/extracao-dos-dados/blocos/databases_auxiliares/internacoes_menores_28_dias/algorithm_episode_of_care/")
 
 #### Rodando o algoritmo em C++ na base de partos
-system(glue("./processaih {diretorio_bases_brutas}/BR_sih_rd_partos_2024_2024.csv"))
+system(glue("./processaih {diretorio_bases_brutas}/BR_sih_rd_partos_2023_2025.csv"))
 
 #### Voltando para o diretório original do projeto
 setwd(diretorio_original)
@@ -486,8 +522,8 @@ df_bloco7_sih_partos <- df_aih_partos |>
 
 ### Removendo arquivos já utilizados e que são maiores que o limite de 100 mb
 file.remove(c(
-  "data-raw/extracao-dos-dados/blocos/databases_auxiliares/internacoes_menores_28_dias/SIH/BR_sih_rd_menores_28_dias_2024_2024.csv",
-  "data-raw/extracao-dos-dados/blocos/databases_auxiliares/internacoes_menores_28_dias/SIH/BR_sih_rd_partos_2024_2024.csv",
+  "data-raw/extracao-dos-dados/blocos/databases_auxiliares/internacoes_menores_28_dias/SIH/BR_sih_rd_menores_28_dias_2023_2025.csv",
+  "data-raw/extracao-dos-dados/blocos/databases_auxiliares/internacoes_menores_28_dias/SIH/BR_sih_rd_partos_2023_2025.csv",
   "data-raw/extracao-dos-dados/blocos/databases_auxiliares/internacoes_menores_28_dias/algorithm_episode_of_care/aihperm.csv",
   "data-raw/extracao-dos-dados/blocos/databases_auxiliares/internacoes_menores_28_dias/algorithm_episode_of_care/aihpermtransf.csv",
   "data-raw/extracao-dos-dados/blocos/databases_auxiliares/internacoes_menores_28_dias/algorithm_episode_of_care/work.sqlite"
@@ -500,7 +536,7 @@ codigos_municipios <- read.csv("data-raw/extracao-dos-dados/blocos/databases_aux
   as.character()
 
 ## Criando um data.frame auxiliar que possui uma linha para cada combinação de município e ano
-df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2012:2024)), ano = 2012:2024)
+df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2023:2025)), ano = 2023:2025)
 
 df_bloco7_sih_partos$codmunres <- as.character(df_bloco7_sih_partos$codmunres)
 df_bloco7_sih_internacoes$codmunres <- as.character(df_bloco7_sih_internacoes$codmunres)
@@ -523,7 +559,7 @@ for (col in names(df_bloco7_morbidade_neonatal)) {
   }
 }
 
-write.csv(df_bloco7_morbidade_neonatal, 'data-raw/csv/indicadores_bloco7_morbidade_neonatal_2012-2024.csv', sep = ",", dec = ".", row.names = FALSE)
+write.csv(df_bloco7_morbidade_neonatal, 'data-raw/csv/indicadores_bloco7_morbidade_neonatal_2023-2025.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
 ############ Dados para a distribuição de internações neonatais
@@ -711,6 +747,6 @@ df_distribuicao_morbidade <- left_join(internacoes_neonatais_grupos, internacoes
 
 df_distribuicao_morbidade[is.na(df_distribuicao_morbidade)] <- 0
 
-write.csv(df_distribuicao_morbidade, 'data-raw/csv/indicadores_bloco7_distribuicao_morbidade_neonatal_2012-2024.csv', sep = ",", dec = ".", row.names = FALSE)
+write.csv(df_distribuicao_morbidade, 'data-raw/csv/indicadores_bloco7_distribuicao_morbidade_neonatal_2023-2025.csv', sep = ",", dec = ".", row.names = FALSE)
 
 

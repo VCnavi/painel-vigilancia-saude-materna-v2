@@ -370,7 +370,7 @@ bloco7_principais_perinatal <- bloco7_principais_perinatal |>
 ## Para o bloco 7 (aba morbidade neonatal)  -------------------------------
 ### Para os indicadores originais -----------------------------------------
 #### Lendo o arquivo contendo todos os indicadores
-bloco7_morbidade_neonatal_aux <- read.csv("data-raw/csv/indicadores_bloco7_morbidade_neonatal_2012-2024.csv") |>
+bloco7_morbidade_neonatal_aux <- read.csv("data-raw/csv/indicadores_bloco7_morbidade_neonatal_2012-2025.csv") |> dplyr::select(-c(total_de_nascidos_vivos)) |>
   dplyr::left_join(bloco7_neonatal_aux |> dplyr::select(codmunres, ano, total_de_nascidos_vivos))
 
 #### Adicionando as informações dos municípios
