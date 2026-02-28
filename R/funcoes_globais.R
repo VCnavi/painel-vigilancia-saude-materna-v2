@@ -98,7 +98,8 @@ cria_indicadores <- function(df_localidade, df_calcs, df_calcs_dist_bloco7 = NUL
 }
 
 
-filtra_localidade <- function(data, filtros, comp = FALSE, referencia = FALSE, localidade_resumo = "escolha1", add_class = TRUE) {
+filtra_localidade <- function(data, filtros, comp = FALSE, referencia = FALSE, localidade_resumo = "escolha1", add_class = TRUE,
+                              nivel_atual = "nivel_2") {
   # Definindo o sufixo
   sufixo <- ifelse(comp == TRUE | localidade_resumo == "escolha2", "2", "")
 
@@ -109,10 +110,17 @@ filtra_localidade <- function(data, filtros, comp = FALSE, referencia = FALSE, l
   nivel_selecionado <- get_filtro("nivel")
 
   # Filtrando o período de análise escolhido
-  data <- dplyr::filter(
-    data,
-    ano >= filtros$ano2[1] & ano <= filtros$ano2[2]
-  )
+  if(nivel_atual == "nivel_1"){
+    data <- dplyr::filter(
+      data,
+      ano == filtros$ano
+    )
+  } else if(nivel_atual == "nivel_2"){
+    data <- dplyr::filter(
+      data,
+      ano >= filtros$ano2[1] & ano <= filtros$ano2[2]
+    )
+  }
 
   # Se for para a referência, não precisamos fazer nenhum filtro adicional
   if (referencia) return(data |> dplyr::mutate(class = "Brasil (valor de referência)"))
@@ -199,7 +207,8 @@ filtra_colunas_evitaveis_principais <- function(
     referencia = FALSE,
     resumo = FALSE,
     localidade_resumo = "escolha1",
-    prefixo_coluna = "evitaveis_fetal"
+    prefixo_coluna = "evitaveis_fetal",
+    nivel_atual = "nivel_2"
 ) {
 
   # Preparação inicial
@@ -217,7 +226,7 @@ filtra_colunas_evitaveis_principais <- function(
   ]
 
   # Filtragem por localidade e escopo
-  dt <- filtra_localidade(as.data.frame(dt), filtros, comp, referencia, localidade_resumo) |>
+  dt <- filtra_localidade(as.data.frame(dt), filtros, comp, referencia, localidade_resumo, nivel_atual = nivel_atual) |>
     data.table::as.data.table()
 
   dt <- dt[class == "Brasil (valor de referência)", class := "Brasil"]
@@ -258,7 +267,8 @@ processa_causas <- function(
     referencia = FALSE,
     grupos = NULL,
     localidade_resumo = "escolha1",
-    prefixo_coluna = "evitaveis_fetal"
+    prefixo_coluna = "evitaveis_fetal",
+    nivel_atual = "nivel_2"
 ) {
 
   # 1. Preparar os dados
@@ -270,7 +280,8 @@ processa_causas <- function(
       filtros = filtros,
       pesos = pesos,
       momentos = momentos,
-      prefixo_coluna = prefixo_coluna
+      prefixo_coluna = prefixo_coluna,
+      nivel_atual = nivel_atual
     )
   )
 
@@ -284,7 +295,8 @@ processa_causas <- function(
       pesos = pesos,
       momentos = momentos,
       localidade_resumo = localidade_resumo,
-      prefixo_coluna = prefixo_coluna
+      prefixo_coluna = prefixo_coluna,
+      nivel_atual = nivel_atual
     )
   )
 
