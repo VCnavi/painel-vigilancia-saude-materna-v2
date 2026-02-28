@@ -1375,7 +1375,7 @@ mod_bloco_7_neonatal_server <- function(id, filtros){
 
     data7_referencia_taxa_de_mortalidade <- eventReactive(c(filtros()$pesquisar, input$input_taxa_de_mortalidade_peso), {
       dfs_referencia_taxa()$graficos |>
-        dplyr::mutate(taxa_de_mortalidade = ifelse(referencia_oms() == TRUE, 8.7, taxa_de_mortalidade))
+        dplyr::mutate(taxa_de_mortalidade = ifelse(referencia_oms() == TRUE, 5, taxa_de_mortalidade))
     },
     ignoreNULL = FALSE
     )
@@ -1389,7 +1389,7 @@ mod_bloco_7_neonatal_server <- function(id, filtros){
 
     data7_referencia_taxa_de_mortalidade_tardia <- eventReactive(c(filtros()$pesquisar, input$input_taxa_de_mortalidade_tardia_peso), {
       dfs_referencia_taxa()$graficos |>
-        dplyr::mutate(taxa_de_mortalidade_tardia = ifelse(referencia_oms_tardia() == TRUE, 3.75, taxa_de_mortalidade_tardia))
+        dplyr::mutate(taxa_de_mortalidade_tardia = ifelse(referencia_oms_tardia() == TRUE, 1.25, taxa_de_mortalidade_tardia))
     },
     ignoreNULL = FALSE
     )

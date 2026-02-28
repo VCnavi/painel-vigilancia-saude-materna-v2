@@ -397,7 +397,6 @@ bloco7_dist_morbidade <- bloco7_dist_morbidade |>
 bloco7_dist_morbidade[is.na(bloco7_dist_morbidade)] <- 0
 
 
-
 # Criando as bases de indicadores de qualidade da informação --------------
 ## Para os indicadores de garbage codes -----------------------------------
 ### Lendo o arquivo contendo todos os indicadores de garbage code para mortalidade
