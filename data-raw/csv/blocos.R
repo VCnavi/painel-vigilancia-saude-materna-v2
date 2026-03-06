@@ -224,7 +224,7 @@ malformacao <- malformacao |>
 bloco6_mortalidade_aux <- read.csv("data-raw/csv/indicadores_bloco6_mortalidade_materna_2012-2025.csv")
 
 ### Lendo o arquivo contendo todos os indicadores de morbidade materna do SUS
-bloco6_morbidade_sus_aux <- read.csv("data-raw/csv/indicadores_bloco6_morbidade_materna_sus_2012-2024.csv", sep = ",") |>
+bloco6_morbidade_sus_aux <- read.csv("data-raw/csv/indicadores_bloco6_morbidade_materna_sus_2012-2025.csv", sep = ",") |>
   janitor::clean_names()
 
 ### Lendo o arquivo contendo todos os indicadores de morbidade materna da ANS
