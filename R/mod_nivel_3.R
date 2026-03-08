@@ -2055,7 +2055,7 @@ mod_nivel_3_server <- function(id, filtros, titulo_localidade_aux){
       )
       req(base_bloco_selecionado())
       base_bloco_selecionado() |>
-        dplyr::filter(ano %in% anos_disponiveis()) |>
+        dplyr::filter(ano %in% anos_disponiveis(),regiao %in% c("Norte","Nordeste","Centro-Oeste","Sudeste","Sul")) |>
         dplyr::group_by(regiao) |>
         dplyr::summarise(
           indicador = !!rlang::parse_expr(infos_indicador()$calculo)
