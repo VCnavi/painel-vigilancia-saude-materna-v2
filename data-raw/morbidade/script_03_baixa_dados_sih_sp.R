@@ -17,7 +17,7 @@ estados <- c("AC","AL","AP","AM","BA","CE","DF","ES","GO","MA",
              "RS","RO","RR","SC","SP","SE","TO")
 
 ## Criando um vetor com os anos considerados (2012 a 2024)
-anos <- 2012:2024
+anos <- 2023:2025
 
 # Definindo os diretórios de entrada e saída ----------------------------------
 sih_rd_dir <- "data-raw/morbidade/databases/01_sih_rd/01_arquivos_brutos"

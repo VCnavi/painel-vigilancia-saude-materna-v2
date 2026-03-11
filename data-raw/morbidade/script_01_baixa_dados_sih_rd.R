@@ -18,7 +18,7 @@ estados <- c("AC","AL","AP","AM","BA","CE","DF","ES","GO","MA",
              "RS","RO","RR","SC","SP","SE","TO")
 
 ## Criando um vetor com os anos considerados (2012 a 2024)
-anos <- 2012:2024
+anos <- 2023:2025
 
 ## Criando um vetor com os procedimentos de interesse
 procedimentos <- c(

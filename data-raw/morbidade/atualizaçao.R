@@ -19,6 +19,6 @@ for (estado in estados) {
 
   dt <- rbind(dt_aux1,dt_aux2)
 
-  write.csv2(dt,glue("databases/01_sih_rd/01_arquivos_brutos/{estado}_sih_rd_bruto_2012_2023.csv"),
+  write.csv2(dt,glue("databases/01_sih_rd/01_arquivos_brutos/{estado}_sih_rd_bruto_2023_2025.csv"),
              row.names = FALSE)
 }
