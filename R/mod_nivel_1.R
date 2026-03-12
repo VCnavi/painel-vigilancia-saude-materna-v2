@@ -3307,7 +3307,7 @@ mod_nivel_1_server <- function(id, filtros) {
       cria_caixa_server(
         dados = data5(),
         indicador = "porc_nasc_baixo_peso",
-        titulo = "Porcentagem de baixo peso ao nascer (< 2500 g)",
+        titulo = "Porcentagem de baixo peso ao nascer",
         tem_meta = TRUE,
         valor_de_referencia = data5_comp_baixo_peso()$porc_nasc_baixo_peso,
         tipo = "porcentagem",
@@ -3322,7 +3322,7 @@ mod_nivel_1_server <- function(id, filtros) {
       cria_caixa_conjunta_bloco5(
         dados = data5(),
         indicador = "baixo peso",
-        titulo = "Dentre os nascidos vivos com baixo peso (< 2500 g),"
+        titulo = "Dentre os nascidos vivos com baixo peso,"
       )
     })
 
@@ -3330,7 +3330,7 @@ mod_nivel_1_server <- function(id, filtros) {
       cria_caixa_server(
         dados = data5(),
         indicador = "porc_nasc_premat",
-        titulo = "Porcentagem de nascimentos prematuros (com menos de 37 semanas de gestação)",
+        titulo = "Porcentagem de nascimentos prematuros",
         tem_meta = TRUE,
         valor_de_referencia = 8,
         tipo = "porcentagem",
@@ -3345,7 +3345,7 @@ mod_nivel_1_server <- function(id, filtros) {
       cria_caixa_conjunta_bloco5(
         dados = data5(),
         indicador = "prematuridade",
-        titulo = "Dentre os nascimentos prematuros (com menos de 37 semanas de gestação),"
+        titulo = "Dentre os nascimentos prematuros,"
       )
     })
 
@@ -3353,7 +3353,7 @@ mod_nivel_1_server <- function(id, filtros) {
       cria_caixa_server(
         dados = data5(),
         indicador = "porc_termo_precoce",
-        titulo = "Porcentagem de nascimentos termo precoce (com 37 ou 38 semanas de gestação)",
+        titulo = "Porcentagem de nascimentos termo precoce",
         tem_meta = TRUE,
         valor_de_referencia = 20,
         tipo = "porcentagem",
