@@ -157,7 +157,7 @@ mod_bloco_5_ui <- function(id) {
               div(
                 style = "height: 10%; display: flex; align-items: center;",
                 HTML(
-                  "<b class = 'fonte-muito-grande'> Porcentagem de baixo peso ao nascer (< 2500 g) &nbsp;</b>"
+                  "<b class = 'fonte-muito-grande'> Porcentagem de baixo peso ao nascer &nbsp;</b>"
                 ),
                 shinyjs::hidden(
                   span(
@@ -216,7 +216,7 @@ mod_bloco_5_ui <- function(id) {
               div(
                 style = "height: 10%; display: flex; align-items: center;",
                 HTML(
-                  "<b class = 'fonte-muito-grande'> Distribuição percentual do baixo peso ao nascer (< 2500g) &nbsp;</b>"
+                  "<b class = 'fonte-muito-grande'> Distribuição percentual do baixo peso ao nascer &nbsp;</b>"
                 ),
                 shinyjs::hidden(
                   span(
@@ -246,7 +246,7 @@ mod_bloco_5_ui <- function(id) {
               div(
                 style = "height: 10%; display: flex; align-items: center;",
                 HTML(
-                  "<b class = 'fonte-muito-grande'> Porcentagem de nascimentos prematuros (com menos de 37 semanas de gestação)&nbsp;</b>"
+                  "<b class = 'fonte-muito-grande'> Porcentagem de nascimentos prematuros &nbsp;</b>"
                 ),
                 shinyjs::hidden(
                   span(
@@ -333,7 +333,7 @@ mod_bloco_5_ui <- function(id) {
               div(
                 style = "height: 11%; display: flex; align-items: center;",
                 HTML(
-                  "<b class = 'fonte-muito-grande'> Porcentagem de nascimentos termo precoce (com 37 ou 38 semanas de gestação)&nbsp;</b>"
+                  "<b class = 'fonte-muito-grande'> Porcentagem de nascimentos termo precoce &nbsp;</b>"
                 ),
                 shinyjs::hidden(
                   span(
@@ -659,7 +659,7 @@ mod_bloco_5_ui <- function(id) {
               style = "height: 570px; padding-top: 0; padding-bottom: 0; overflow-y: auto",
               div(
                 style = "height: 10%; display: flex; align-items: center;",
-                HTML("<b class = 'fonte-muito-grande'> Tabela dos grupos de anomalias congênitas prioritárias para vigilância definidos pelo Ministério da Saúde (Fonte: <a href = https://www.gov.br/saude/pt-br/centrais-de-conteudo/publicacoes/svsa/vigilancia/guia-de-vigilancia-em-saude-5a-edicao-revisada-e-atualizada-2022 , target = _blank>link</a>) &nbsp;</b>")
+                HTML("<b class = 'fonte-muito-grande'> Tabela dos grupos de anomalias congênitas prioritárias para vigilância definidos pelo <a href = https://www.gov.br/saude/pt-br/centrais-de-conteudo/publicacoes/svsa/vigilancia/guia-de-vigilancia-em-saude-5a-edicao-revisada-e-atualizada-2022 , target = _blank>Ministério da Saúde</a> &nbsp;</b>")
               ),
               hr(),
               shinycssloaders::withSpinner(reactable::reactableOutput(ns("tabela_malformacoes")))
@@ -1371,7 +1371,7 @@ mod_bloco_5_server <- function(id, filtros){
       cria_caixa_server(
         dados = data5_resumo(),
         indicador = "porc_nasc_baixo_peso",
-        titulo = "Porcentagem de baixo peso ao nascer (< 2500 g)",
+        titulo = "Porcentagem de baixo peso ao nascer",
         tem_meta = TRUE,
         valor_de_referencia = data5_resumo_referencia_baixo_peso()$porc_nasc_baixo_peso,
         tipo = "porcentagem",
@@ -1396,7 +1396,7 @@ mod_bloco_5_server <- function(id, filtros){
       cria_caixa_conjunta_bloco5(
         dados = data5_resumo(),
         indicador = "baixo peso",
-        titulo = "Dentre os nascidos vivos com baixo peso (< 2500 g),",
+        titulo = "Dentre os nascidos vivos com baixo peso,",
         #fonte_titulo = "15px",
         tamanho_caixa = 320
       )
@@ -1407,7 +1407,7 @@ mod_bloco_5_server <- function(id, filtros){
       cria_caixa_server(
         dados = data5_resumo(),
         indicador = "porc_nasc_premat",
-        titulo = "Porcentagem de nascimentos prematuros (com menos de 37 semanas de gestação)",
+        titulo = "Porcentagem de nascimentos prematuros",
         tem_meta = TRUE,
         valor_de_referencia = 8,
         tipo = "porcentagem",
@@ -1432,7 +1432,7 @@ mod_bloco_5_server <- function(id, filtros){
       cria_caixa_conjunta_bloco5(
         dados = data5_resumo(),
         indicador = "prematuridade",
-        titulo = "Dentre os nascimentos prematuros (com menos de 37 semanas de gestação),",
+        titulo = "Dentre os nascimentos prematuros,",
         tamanho_caixa = 320
       )
     })
@@ -1442,7 +1442,7 @@ mod_bloco_5_server <- function(id, filtros){
       cria_caixa_server(
         dados = data5_resumo(),
         indicador = "porc_termo_precoce",
-        titulo = "Porcentagem de nascimentos termo precoce (com 37 ou 38 semanas de gestação)",
+        titulo = "Porcentagem de nascimentos termo precoce",
         tem_meta = TRUE,
         valor_de_referencia = 20,
         #valor_de_referencia = data5_resumo_referencia()$porc_termo_precoce,
