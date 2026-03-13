@@ -1,35 +1,107 @@
 # Carregando os pacotes necessários
-library(dplyr)
-library(tidyr)
+library(tidyverse)
+library(httr)
 library(janitor)
+library(getPass)
+library(repr)
+library(data.table)
+library(readr)
+library(openxlsx)
 library(microdatasus)
+library(future)
+library(future.apply)
 
-# Criando alguns objetos auxiliares ----------------------------------------
-## Criando um objeto que recebe os códigos dos municípios que utilizamos no painel
+# Variáveis utilizadas no SINASC
+vars <- c("PESO", "GESTACAO", "SEMAGESTAC", "APGAR5")
+
+# Inserir informações:
+# Todos os anos a serem baixados
+anos <- c(2023:2025)
+# Ano baixado pelo opendatasus
+ano_opendatasus <- 2025
+# Links para o ano baixado pelo opendatasus
+link_opendatasus_sinasc <- "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2025_csv.zip"
+
 codigos_municipios <- read.csv("data-raw/extracao-dos-dados/blocos/databases_auxiliares/tabela_aux_municipios.csv") |>
   pull(codmunres) |>
   as.character()
 
-## Criando um data.frame auxiliar que possui uma linha para cada combinação de município e ano
-df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2012:2023)), ano = 2012:2023)
+## Criando data.frames que irão receber os dados dos indicadores de causas evitáveis e grupos de causa
+df_sinasc_incompletude_aux <- data.frame(codmunres = rep(codigos_municipios, each = length(anos)), ano = anos)
+
+# Baixando os dados do SINASC (com paralelização) -------------------------
+## Criando o planejamento dos futures
+plan(multisession)
+options(timeout = 600)
+## Criando uma função que baixa todos os dados necessários para um certo ano
+processa_ano <- function(ano) {
+  # Carrega os pacotes dentro da worker
+  library(microdatasus)
+  library(dplyr)
+  library(data.table)
+  library(stringr)
+
+  # Criando uma função para criar a coluna de "ano" em bases do SIM e SINASC
+  extrai_ano <- function(data, n = 4) {
+    as.numeric(substr(data, nchar(data) - n + 1, nchar(data)))
+  }
+
+  # Criando uma função para insistir várias vezes no download
+  fread_retry <- function(url, ..., max_tries = 10, wait_seconds = 10) {
+    for (i in seq_len(max_tries)) {
+      tryCatch({
+        message(sprintf("Tentando baixar: %s (tentativa %d de %d)", url, i, max_tries))
+        df <- data.table::fread(url, ...)
+        return(df)
+      },
+      error = function(e) {
+        message("Erro ao tentar baixar: ", conditionMessage(e))
+        if (i < max_tries) {
+          message(sprintf("Aguardando %d segundos para nova tentativa...", wait_seconds))
+          Sys.sleep(wait_seconds)
+        } else {
+          stop("Falha ao baixar após ", max_tries, " tentativas.")
+        }
+      })
+    }
+  }
+
+  # Criando uma função genérica para baixar dados pelo microdatasus
+  baixa_dados <- function(ano, sistema, data_col, vars = NULL) {
+    # Tratamento especial para os dados preliminares
+    if (ano == ano_opendatasus) {
+      switch(sistema,
+             "SINASC" = {
+               fread_retry(link_opendatasus_sinasc, sep = ";") |>
+                 mutate(ano = extrai_ano(.data[[data_col]])) |>
+                 select(c("CODMUNRES", "ano", data_col, all_of(vars)))
+             }
+      )
+    } else {
+      # Anos consolidados via microdatasus
+      dados <- fetch_datasus(
+        year_start = ano,
+        year_end = ano,
+        information_system = sistema,
+        vars = c("CODMUNRES", data_col, vars)
+      ) |>
+        mutate(ano = extrai_ano(.data[[data_col]]))
+
+      dados
+    }
+  }
+
+  message("Processando ano ", ano)
+  list(
+    sinasc = baixa_dados(ano, "SINASC", "DTNASC", vars = c(vars))
+  )
+}
 
 
-# Baixando os dados do SINASC ----------------------------------------------
-## Baixando os dados consolidados do SINASC e selecionando as variáveis de interesse
-df_sinasc_aux <- fetch_datasus(
-  year_start = 2012,
-  year_end = 2023,
-  vars = c("CODMUNRES", "DTNASC", "PESO", "GESTACAO", "SEMAGESTAC", "APGAR5"),
-  information_system = "SINASC"
-)
+## Baixando todos os dados
+resultados <- future_lapply(anos, processa_ano)
 
-## Criando a variável de ano e transformando algumas variáveis
-df_sinasc <- df_sinasc_aux |>
-  mutate(
-    ano = as.numeric(substr(DTNASC, nchar(DTNASC) - 3, nchar(DTNASC))),
-    .keep = "unused",
-    .after = "CODMUNRES"
-  ) |>
+df_sinasc <- rbindlist(lapply(resultados, `[[`, "sinasc"), fill = TRUE) |>
   clean_names() |>
   mutate(
     peso = as.numeric(peso),
@@ -82,4 +154,4 @@ df_incompletude_bloco7_morbidade <- df_sinasc |>
   arrange(codmunres, ano)
 
 ## Exportando os dados
-write.csv(df_incompletude_bloco7_morbidade, 'data-raw/csv/indicadores_incompletude_bloco7_morbidade_2012-2023.csv', row.names = FALSE)
+write.csv(df_incompletude_bloco7_morbidade, 'data-raw/csv/indicadores_incompletude_bloco7_morbidade_2023-2025.csv', row.names = FALSE)
