@@ -9,6 +9,8 @@ library(future)
 library(future.apply)
 library(readxl)
 library(glue)
+library(DBI)
+library(RSQLite)
 
 # Inserir informações:
 # Todos os anos a serem baixados
@@ -456,11 +458,17 @@ df_bloco7_sih_internacoes <- df_aih_internacoes_wide_macros |>
     internacoes_fora_macro_geral = internacoes_fora_macro_7_a_27_dias + internacoes_fora_macro_1_a_6_dias + internacoes_fora_macro_0_dias,
     internacoes_geral_geral = internacoes_geral_7_a_27_dias + internacoes_geral_1_a_6_dias + internacoes_geral_0_dias,
     # Para o indicador de internações em UTI, os nomes das variáveis seguem o padrão "internacoes_local-do-parto_idade-do-bebe_internado_uti"
-    internacoes_na_macro_geral_internado_uti = sum(c_across(contains("na_macro") & contains("dias_internado"))),
-    internacoes_fora_macro_geral_internado_uti = sum(c_across(contains("fora_macro") & contains("dias_internado"))),
-    internacoes_geral_7_a_27_dias_internado_uti = sum(c_across(contains("7_a_27_dias_internado"))),
-    internacoes_geral_1_a_6_dias_internado_uti = sum(c_across(contains("1_a_6_dias_internado"))),
-    internacoes_geral_0_dias_internado_uti = sum(c_across(contains("0_dias_internado"))),
+    internacoes_na_macro_geral_internado_uti = sum(c_across(contains("na_macro") & contains("dias_internado_uti"))),
+    internacoes_fora_macro_geral_internado_uti = sum(c_across(contains("fora_macro") & contains("dias_internado_uti"))),
+    internacoes_fora_macro_0_dias_internado_uti = sum(c_across(contains("fora_macro") & contains("0_dias") & contains("dias_internado_uti"))),
+    internacoes_fora_macro_1_a_6_dias_internado_uti = sum(c_across(contains("fora_macro") & contains("1_a_6_dias") & contains("dias_internado_uti"))),
+    internacoes_fora_macro_7_a_27_dias_internado_uti = sum(c_across(contains("fora_macro") & contains("7_a_27_dias") & contains("dias_internado_uti"))),
+    internacoes_na_macro_0_dias_internado_uti = sum(c_across(contains("na_macro") & contains("0_dias") & contains("dias_internado_uti"))),
+    internacoes_na_macro_1_a_6_dias_internado_uti = sum(c_across(contains("na_macro") & contains("1_a_6_dias") & contains("dias_internado_uti"))),
+    internacoes_na_macro_7_a_27_dias_internado_uti = sum(c_across(contains("na_macro") & contains("7_a_27_dias") & contains("dias_internado_uti"))),
+    internacoes_geral_7_a_27_dias_internado_uti = sum(c_across(contains("7_a_27_dias_internado_uti"))),
+    internacoes_geral_1_a_6_dias_internado_uti = sum(c_across(contains("1_a_6_dias_internado_uti"))),
+    internacoes_geral_0_dias_internado_uti = sum(c_across(contains("0_dias_internado_uti"))),
     internacoes_geral_geral_internado_uti = internacoes_geral_7_a_27_dias_internado_uti + internacoes_geral_1_a_6_dias_internado_uti + internacoes_geral_0_dias_internado_uti
   ) |>
   select(ano, codmunres, ends_with("_6_dias"), ends_with("_27_dias"), ends_with("_0_dias"), ends_with("_geral"), ends_with("internado_uti") & !ends_with("nao_internado_uti"))

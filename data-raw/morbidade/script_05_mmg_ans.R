@@ -4,6 +4,8 @@ library( lubridate )
 library( openxlsx )
 library( rvest )
 library(janitor)
+library(rvest)
+library(stringr)
 
 # diretorio ANS
 dir_ans <- "data-raw/morbidade/databases/04_mmg_ans/"
@@ -19,51 +21,106 @@ link_ans_hosp <- "https://dadosabertos.ans.gov.br/FTP/PDA/TISS/HOSPITALAR/"
 
 pag_ans_hosp <- read_html( link_ans_hosp )
 
-anos_ans <- pag_ans_hosp %>% html_element( "table" ) %>% html_elements( "a" ) %>% html_attr( "href" )
+#anos_ans <- pag_ans_hosp %>% html_element( "table" ) %>% html_elements( "a" ) %>% html_attr( "href" )
 
-anos_ans <- anos_ans[ anos_ans %>% str_starts( "20" ) ]
+#anos_ans <- anos_ans[ anos_ans %>% str_starts( "20" ) ]
+anos_ans <- c("2023/", "2024/")
 
-for( anos in anos_ans )
-{
-  dir.create( str_c( dir_ans, anos, sep = "/" ) )
+options(timeout = 600)
 
-  links_ans_uf <- str_c( link_ans_hosp, anos )
+max_tentativas <- 5
 
-  pag_ans_uf <- read_html( links_ans_uf )
+download_retry <- function(url, dest, max_try = 5, sleep_s = 3) {
+  if (file.exists(dest) && file.info(dest)$size > 0) return(TRUE)
 
-  uf_ans <- pag_ans_uf %>% html_element( "table" ) %>% html_elements( "a" ) %>% html_attr( "href" )
+  dir.create(dirname(dest), recursive = TRUE, showWarnings = FALSE)
 
-  uf_ans <- uf_ans[ uf_ans %>% str_length() == 3 ]
+  for (i in seq_len(max_try)) {
+    ok <- tryCatch({
+      # tente libcurl (mais robusto). Se falhar no seu SO, troque por "auto" ou "wininet" (Windows)
+      download.file(url, destfile = dest, mode = "wb", method = "libcurl", quiet = TRUE)
+      file.exists(dest) && file.info(dest)$size > 0
+    }, error = function(e) FALSE, warning = function(w) FALSE)
 
-  for( uf in uf_ans)
-  {
-    dir.create( str_c( dir_ans, anos, uf, sep = "/" ) )
+    if (isTRUE(ok)) return(TRUE)
 
-    arqs_uf <- str_c( links_ans_uf, uf )
+    # limpa arquivo parcial, se existir
+    if (file.exists(dest)) file.remove(dest)
+    Sys.sleep(sleep_s)
+  }
+  FALSE
+}
 
-    pag_ans_arqs <- read_html( arqs_uf )
+for (ano in anos_ans) {
+  dir_ano <- str_c(dir_ans, ano, sep = "/")
+  dir.create(dir_ano, recursive = TRUE, showWarnings = FALSE)
 
-    arqs_dl <- pag_ans_arqs %>% html_element( "table" ) %>% html_elements( "a" ) %>% html_text()
+  links_ans_uf <- str_c(link_ans_hosp, ano)
 
-    arqs_dl <- arqs_dl[ arqs_dl %>% str_starts( str_sub( uf, 1, 2 ) ) ]
+  # retry para ler HTML da página de UFs
+  pag_ans_uf <- NULL
+  for (i in seq_len(max_tentativas)) {
+    pag_ans_uf <- tryCatch(read_html(links_ans_uf), error = function(e) NULL)
+    if (!is.null(pag_ans_uf)) break
+    Sys.sleep(2)
+  }
+  if (is.null(pag_ans_uf)) {
+    message("Falhou ao acessar página do ano: ", ano, " (pulando).")
+    next
+  }
 
-    for( arqs in arqs_dl )
-    {
-      download.file( str_c( arqs_uf, arqs ), str_c( dir_ans, anos, uf, arqs, sep = "/" ) )
+  uf_ans <- pag_ans_uf %>% html_element("table") %>% html_elements("a") %>% html_attr("href")
+  uf_ans <- uf_ans[str_length(uf_ans) == 3]
 
-      print( arqs )
+  for (uf in uf_ans) {
+    dir_uf <- str_c(dir_ans, ano, uf, sep = "/")
+    dir.create(dir_uf, recursive = TRUE, showWarnings = FALSE)
+
+    arqs_uf <- str_c(links_ans_uf, uf)
+
+    # retry para ler HTML da página da UF
+    pag_ans_arqs <- NULL
+    for (i in seq_len(max_tentativas)) {
+      pag_ans_arqs <- tryCatch(read_html(arqs_uf), error = function(e) NULL)
+      if (!is.null(pag_ans_arqs)) break
+      Sys.sleep(2)
+    }
+    if (is.null(pag_ans_arqs)) {
+      message("Falhou ao acessar UF ", uf, " no ano ", ano, " (pulando UF).")
+      next
     }
 
-    Sys.sleep( 1.0 )
+    arqs_dl <- pag_ans_arqs %>% html_element("table") %>% html_elements("a") %>% html_text()
+    arqs_dl <- arqs_dl[str_starts(arqs_dl, str_sub(uf, 1, 2))]
 
+    for (arq in arqs_dl) {
+      url  <- str_c(arqs_uf, arq)
+      dest <- str_c(dir_ans, ano, uf, arq, sep = "/")
+
+      # pula se já existir
+      if (file.exists(dest) && file.info(dest)$size > 0) {
+        message("Já existe, pulando: ", arq)
+        next
+      }
+
+      ok <- download_retry(url, dest, max_try = max_tentativas, sleep_s = 3)
+
+      if (ok) {
+        message("Baixado: ", arq)
+      } else {
+        message("Falhou após ", max_tentativas, " tentativas: ", arq)
+      }
+    }
+
+    Sys.sleep(1.0)
   }
 }
 
 
+
 # unzip files
 
-for( anos in anos_ans )
-{
+for( anos in anos_ans ){
   for( uf in uf_ans )
   {
     arqs_dl <- list.files( str_c( dir_ans, anos, uf, sep = "/" ) )
@@ -78,56 +135,96 @@ for( anos in anos_ans )
 
 # ler e juntar os arquivos csv CONS por ano
 
-anos_ans <- list.dirs( dir_ans, full.names = FALSE, recursive = FALSE )
+#anos_ans <- list.dirs( dir_ans, full.names = FALSE, recursive = FALSE )
 
-anos_ans <- anos_ans[ str_starts( anos_ans, "20" ) ]
+#anos_ans <- anos_ans[ str_starts( anos_ans, "20" ) ]
+
+anos_ans <- c("2023", "2024")
 
 uf_ans <- list.dirs( str_c( dir_ans, anos_ans[ 1 ], sep = "/" ), full.names = FALSE, recursive = FALSE )
 
 ans_cons_resumo <- tibble( UF = character(), ANO = character(), TOTAL = integer() )
 
-for( anos in anos_ans )
-{
-  ans_cons_tot <- tibble()
+for (anos in anos_ans) {
 
-  for( uf in uf_ans )
-  {
-    arqs_dl_cons <- list.files( str_c( dir_ans, anos, uf, sep = "/" ), pattern = "CONS.csv$" )
+  # lista para acumular todos os data frames do ano
+  cons_list <- list()
+  k <- 0L
 
-    for( arqs in arqs_dl_cons )
-    {
-      df_cons_temp <- read_csv2( str_c( dir_ans, anos, uf, arqs, sep = "/" ), col_types = cols( .default = "c" ) )
+  # vetores para o resumo
+  r_uf <- character()
+  r_ano <- character()
+  r_total <- integer()
 
-      ans_cons_resumo %<>% add_row( UF = str_sub( arqs, 1, 2 ), ANO = str_sub( arqs, 4, 7 ), TOTAL = nrow( df_cons_temp ) )
+  for (uf in uf_ans) {
 
-      ans_cons_tot %<>% bind_rows( df_cons_temp )
+    dir_uf <- file.path(dir_ans, anos, uf)
+    arqs_dl_cons <- list.files(dir_uf, pattern = "CONS\\.csv$", full.names = TRUE)
+
+    for (path in arqs_dl_cons) {
+
+      df_cons_temp <- read_csv2(
+        path,
+        col_types = cols(.default = col_character())
+      )
+
+      k <- k + 1L
+      cons_list[[k]] <- df_cons_temp
+
+      # usa o nome do arquivo pra extrair UF/ANO
+      arq <- basename(path)
+      r_uf   <- c(r_uf,  str_sub(arq, 1, 2))
+      r_ano  <- c(r_ano, str_sub(arq, 4, 7))
+      r_total <- c(r_total, nrow(df_cons_temp))
+
+      # remove o objeto do arquivo imediatamente
+      rm(df_cons_temp)
     }
 
-    print( str_c( anos, uf, sep = " ; " ) )
+    message(anos, " ; ", uf)
   }
 
-  ans_cons_tot %>% write_delim( str_c( dir_ans, "/", anos, "/", "TOTAL_", anos, "_CONS.csv" ), delim = "|", na = "", quote = "none" )
+  ans_cons_tot <- bind_rows(cons_list)
 
-  rm( list = c( "ans_cons_tot", "ans_det_tot", "df_cons_temp", "df_det_temp" ) )
+  ans_cons_resumo <- bind_rows(
+    ans_cons_resumo,
+    tibble(UF = r_uf, ANO = r_ano, TOTAL = r_total)
+  )
+
+  write_delim(
+    ans_cons_tot,
+    file.path(dir_ans, anos, paste0("TOTAL_", anos, "_CONS.csv")),
+    delim = "|",
+    na = "",
+    quote = "none"
+  )
+
+  # limpeza
+  rm(cons_list, ans_cons_tot, r_uf, r_ano, r_total, k)
   gc()
 }
 
 
 # juntar todos os anos dos arquivos CONS
 
-ans_cons_tot <- tibble()
+df_list <- vector("list", length(anos_ans))
 
-for( anos in anos_ans )
-{
-  df_cons_temp <- read_delim( str_c( dir_ans, "/", anos, "/", "TOTAL_", anos, "_CONS.csv" ), delim = "|", quote = "", na = "", col_types = cols( .default = "c" ) )
+for (i in seq_along(anos_ans)) {
+  anos <- anos_ans[i]
 
-  ans_cons_tot %<>% bind_rows( df_cons_temp )
+  df_list[[i]] <- read_delim(
+    file.path(dir_ans, anos, paste0("TOTAL_", anos, "_CONS.csv")),
+    delim = "|",
+    quote = "",      # mantém seu comportamento
+    na = "",
+    col_types = cols(.default = col_character())
+  )
 
-  print( anos )
-
-  rm( df_cons_temp )
-  gc()
+  message(anos)
 }
+
+ans_cons_tot <- bind_rows(df_list)
+rm(df_list); gc()
 
 ans_cons_tot %>% write_delim( str_c( dir_ans, "ans_cons_tot.csv", sep = "/" ), delim = "|", na = "", quote = "none" )
 
@@ -159,37 +256,79 @@ ans_cons_sumario %>% write.xlsx( str_c( dir_ans, "ans_cons_sumario.xlsx", sep = 
 
 # ler e juntar os arquivos csv DET por ano
 
-anos_ans <- list.dirs( dir_ans, full.names = FALSE, recursive = FALSE )
+#anos_ans <- list.dirs( dir_ans, full.names = FALSE, recursive = FALSE )
 
-anos_ans <- anos_ans[ str_starts( anos_ans, "20" ) ]
+#anos_ans <- anos_ans[ str_starts( anos_ans, "20" ) ]
+
+anos_ans <- c("2023", '2024')
 
 uf_ans <- list.dirs( str_c( dir_ans, anos_ans[ 1 ], sep = "/" ), full.names = FALSE, recursive = FALSE )
 
 ans_det_sumario <- tibble( UF = character(), ANO = character(), TOTAL = integer() )
 
-for( anos in anos_ans )
-{
-  ans_det_tot <- tibble()
+# anos e ufs (mantive sua lógica, mas usando file.path pra evitar colagem de strings)
+anos_ans <- list.dirs(dir_ans, full.names = FALSE, recursive = FALSE)
+anos_ans <- anos_ans[str_starts(anos_ans, "20")]
+anos_ans <- c("2023", "2024")
 
-  for( uf in uf_ans )
-  {
-    arqs_dl_det <- list.files( str_c( dir_ans, anos, uf, sep = "/" ), pattern = "DET.csv$" )
+uf_ans <- list.dirs(file.path(dir_ans, anos_ans[1]), full.names = FALSE, recursive = FALSE)
 
-    for( arqs in arqs_dl_det )
-    {
-      df_det_temp <- read_csv2( str_c( dir_ans, anos, uf, arqs, sep = "/" ), col_types = cols( .default = "c" ) )
+ans_det_sumario <- tibble(UF = character(), ANO = character(), TOTAL = integer())
 
-      ans_det_sumario %<>% add_row( UF = str_sub( arqs, 1, 2 ), ANO = str_sub( arqs, 4, 7 ), TOTAL = nrow( df_det_temp ) )
+for (anos in anos_ans) {
 
-      ans_det_tot %<>% bind_rows( df_det_temp )
+  # acumular dados do ano
+  det_list <- list()
+  k <- 0L
+
+  s_uf <- character()
+  s_ano <- character()
+  s_total <- integer()
+
+  for (uf in uf_ans) {
+
+    dir_uf <- file.path(dir_ans, anos, uf)
+    arqs_dl_det <- list.files(dir_uf, pattern = "DET\\.csv$", full.names = TRUE)
+
+    for (path in arqs_dl_det) {
+
+      df_det_temp <- read_csv2(
+        path,
+        col_types = cols(.default = col_character())
+      )
+
+      # guarda para juntar no final
+      k <- k + 1L
+      det_list[[k]] <- df_det_temp
+
+      # extrai do nome do arquivo
+      arq <- basename(path)
+      s_uf <- c(s_uf, str_sub(arq, 1, 2))
+      s_ano <- c(s_ano, str_sub(arq, 4, 7))
+      s_total <- c(s_total, nrow(df_det_temp))
+
+      rm(df_det_temp)
     }
 
-    print( str_c( anos, uf, sep = " ; " ) )
+    message(anos, " ; ", uf)
   }
 
-  ans_det_tot %>% write_delim( str_c( dir_ans, "/", anos, "/", "TOTAL_", anos, "_DET.csv" ), delim = "|", na = "", quote = "none" )
+  ans_det_tot <- bind_rows(det_list)
 
-  rm( list = c( "ans_det_tot", "df_det_temp" ) )
+  ans_det_sumario <- bind_rows(
+    ans_det_sumario,
+    tibble(UF = s_uf, ANO = s_ano, TOTAL = s_total)
+  )
+
+  write_delim(
+    ans_det_tot,
+    file.path(dir_ans, anos, paste0("TOTAL_", anos, "_DET.csv")),
+    delim = "|",
+    na = "",
+    quote = "none"
+  )
+
+  rm(det_list, ans_det_tot, s_uf, s_ano, s_total, k)
   gc()
 }
 
@@ -205,22 +344,36 @@ ans_det_sumario %<>% group_by( UF, ANO ) %>% summarise( TOTAL = sum( TOTAL, na.r
 
 # ans_cons_mm <- read_delim( "ANS/ans_cons_mm.csv", delim = "|", quote = "", na = "", col_types = cols( .default = "c" ) )
 
-ans_det_mm <- tibble()
+# vetor de ids para filtrar
+ids_cons <- unique(ans_cons_mm$ID_EVENTO_ATENCAO_SAUDE)
 
-for( anos in anos_ans )
-{
-  df_det_temp <- read_delim( str_c( dir_ans, "/", anos, "/", "TOTAL_", anos, "_DET.csv" ), delim = "|", quote = "", na = "", col_types = cols( .default = "c" ) )
+det_list <- vector("list", length(anos_ans))
 
-  df_det_temp %<>% select( ID_EVENTO_ATENCAO_SAUDE, UF_PRESTADOR, TEMPO_DE_PERMANENCIA, ANO_MES_EVENTO, CD_PROCEDIMENTO, CD_TABELA_REFERENCIA ) %>%
-    semi_join( ans_cons_mm, by = "ID_EVENTO_ATENCAO_SAUDE" )
+for (i in seq_along(anos_ans)) {
+  anos <- anos_ans[i]
 
-  ans_det_mm %<>% bind_rows( df_det_temp )
+  path <- file.path(dir_ans, anos, paste0("TOTAL_", anos, "_DET.csv"))
 
-  print( anos )
+  df_det_temp <- read_delim(
+    path,
+    delim = "|",
+    quote = "",
+    na = "",
+    col_types = cols(.default = col_character())
+  )
 
-  rm( df_det_temp )
-  gc()
+  # filtra por chave (equivalente ao semi_join por ID)
+  df_det_temp <- df_det_temp %>%
+    filter(ID_EVENTO_ATENCAO_SAUDE %in% ids_cons)
+
+  det_list[[i]] <- df_det_temp
+
+  message(anos)
+  rm(df_det_temp); gc()
 }
+
+ans_det_mm <- bind_rows(det_list)
+rm(det_list); gc()
 
 ans_det_mm %>% write_delim( str_c( dir_ans, "ans_det_mm.csv", sep = "/" ), delim = "|", na = "", quote = "none" )
 
@@ -360,6 +513,25 @@ ans_det_mm %<>% mutate( IND_GRAVIDEZ_ECTOPICA_DET = if_else( CD_PROCEDIMENTO %in
 
 ans_det_mm %>% write_delim( str_c( dir_ans, "ans_det_mm.csv", sep = "/" ), delim = "|", na = "", quote = "none" )
 
+# library(readr)
+#
+ # ans_det_mm <- read_delim(
+ #   file.path(dir_ans, "ans_det_mm.csv"),
+ #   delim = "|",
+ #   na = "",
+ #   quote = "",
+ #   col_types = cols(.default = col_character())
+ # )
+ #
+ # gc()
+ #
+ # ans_cons_mm <- read_delim(
+ #   file.path(dir_ans, "ans_cons_mm.csv"),
+ #   delim = "|",
+ #   na = "",
+ #   quote = "",
+ #   col_types = cols(.default = col_character())
+ # )
 
 # agrupar base
 
@@ -619,8 +791,8 @@ codigo_ibge <- tribble( ~ estado, ~ UF, ~ codigo,
 # calculo do total por MUNICIPIO por ANO
 
 
-ans_obs_mun <- tibble( MUNICIPIO_DE_RESIDENCIA = rep( unique( ans_obs$CD_MUNICIPIO_BENEFICIARIO ), each = length( 2015:2024 ) ),
-                       ANO = rep( 2015:2024, times = length( unique( ans_obs$CD_MUNICIPIO_BENEFICIARIO ) ) ) ) %>%
+ans_obs_mun <- tibble( MUNICIPIO_DE_RESIDENCIA = rep( unique( ans_obs$CD_MUNICIPIO_BENEFICIARIO ), each = length( 2023:2025 ) ),
+                       ANO = rep( 2023:2025, times = length( unique( ans_obs$CD_MUNICIPIO_BENEFICIARIO ) ) ) ) %>%
   mutate( ANO = as.character( ANO ) ) %>% arrange( MUNICIPIO_DE_RESIDENCIA, ANO )
 
 ans_obs_mun %<>%
@@ -644,8 +816,8 @@ codigos_municipios <- read.csv(
 
 # Criando um data.frame auxiliar que possui uma linha para cada combinação de município e ano
 df_aux_municipios <- data.frame(
-  codmunres = rep(codigos_municipios, each = length(2012:2024)),
-  ano = 2012:2024
+  codmunres = rep(codigos_municipios, each = length(2023:2025)),
+  ano = 2023:2025
 )
 
 # Juntando com a base de MMG da ANS
@@ -663,6 +835,6 @@ df_mmg_ans_final <- left_join(
   dplyr::mutate(across(everything(), ~ tidyr::replace_na(.x, 0)))
 
 # salvar base total por MUNICIPIO por ANO
-df_mmg_ans_final %>% write.csv("data-raw/csv/indicadores_bloco6_morbidade_materna_ans_2012-2024.csv", row.names = FALSE)
+df_mmg_ans_final %>% write.csv("data-raw/csv/indicadores_bloco6_morbidade_materna_ans_2023-2025.csv", row.names = FALSE)
 
 

@@ -89,7 +89,7 @@ bloco1 <- bloco1 |>
 
 ## Para o bloco 2 ---------------------------------------------------------
 ### Lendo o arquivo contendo todos os indicadores
-bloco2_aux <- read.csv("data-raw/csv/indicadores_bloco2_planejamento_reprodutivo_SUS_ANS_2012_2024.csv") |>
+bloco2_aux <- read.csv("data-raw/csv/indicadores_bloco2_planejamento_reprodutivo_SUS_ANS_2012_2025.csv") |>
   janitor::clean_names()
 
 ### Adicionando as informações dos municípios
@@ -224,7 +224,7 @@ malformacao <- malformacao |>
 bloco6_mortalidade_aux <- read.csv("data-raw/csv/indicadores_bloco6_mortalidade_materna_2012-2025.csv")
 
 ### Lendo o arquivo contendo todos os indicadores de morbidade materna do SUS
-bloco6_morbidade_sus_aux <- read.csv("data-raw/csv/indicadores_bloco6_morbidade_materna_sus_2012-2024.csv", sep = ",") |>
+bloco6_morbidade_sus_aux <- read.csv("data-raw/csv/indicadores_bloco6_morbidade_materna_sus_2012-2025.csv", sep = ",") |>
   janitor::clean_names()
 
 ### Lendo o arquivo contendo todos os indicadores de morbidade materna da ANS
@@ -370,7 +370,7 @@ bloco7_principais_perinatal <- bloco7_principais_perinatal |>
 ## Para o bloco 7 (aba morbidade neonatal)  -------------------------------
 ### Para os indicadores originais -----------------------------------------
 #### Lendo o arquivo contendo todos os indicadores
-bloco7_morbidade_neonatal_aux <- read.csv("data-raw/csv/indicadores_bloco7_morbidade_neonatal_2012-2025.csv") |> dplyr::select(-c(total_de_nascidos_vivos)) |>
+bloco7_morbidade_neonatal_aux <- read.csv("data-raw/csv/indicadores_bloco7_morbidade_neonatal_2012-2025.csv") |>
   dplyr::left_join(bloco7_neonatal_aux |> dplyr::select(codmunres, ano, total_de_nascidos_vivos))
 
 #### Adicionando as informações dos municípios

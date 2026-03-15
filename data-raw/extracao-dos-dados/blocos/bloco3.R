@@ -1,4 +1,4 @@
-
+# Carregando os pacotes necessários
 library(microdatasus)
 library(dplyr)
 library(janitor)
@@ -9,81 +9,65 @@ library(stringr)
 library(tidyr)
 library(data.table)
 
-# Baixar os dados ano a ano
-# Criar um vetor para armazenar os dados de cada ano
-df_list <- list()
+# Criando alguns objetos auxiliares ---------------------------------------
+## Criando um objeto que recebe os códigos dos municípios que utilizamos no painel
+codigos_municipios <- read_csv("data-raw/extracao-dos-dados/blocos/databases_auxiliares/tabela_aux_municipios.csv") |>
+  pull(municipio)
 
-df_lis
+## Criando um data.frame auxiliar que possui uma linha para cada combinação de município e ano
+df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios,
+                                                each = length(2012:2025)),
+                                ano = 2012:2025)
 
-anos <- c(2012, 2014:2024)
+# Para os indicadores provenientes do SINASC ------------------------------
+## Baixando os dados consolidados do SINASC de 2012 a 2024 e selecionando as variáveis de interesse
 
-for (ano in anos){
+### Baixando SINASC 2012
+df_2012 <- fetch_datasus(
+  year_start = 2012,
+  year_end = 2012,
+  information_system = "SINASC",
+  vars = c("CODMUNRES", "DTNASC", "CONSPRENAT", "MESPRENAT", "SEMAGESTAC"))
 
-  df_ano <- fetch_datasus(
-    year_start = ano,
-    year_end = ano,
-    information_system = "SINASC",
-    vars = c("CODMUNRES", "DTNASC", "CONSPRENAT", "MESPRENAT", "SEMAGESTAC"))
-
-  # Adicionar a variável ANO ao dataframe
-  df_ano$ano <- ano
-
-  # Adicionar o dataframe à lista
-  df_list[[ano - 2011]] <- df_ano
-
-}
-
-# CONSPRENAT não é definada para o ano de 2013 então a forma de baixar vai ser diferente
-df_ano <- fetch_datasus(
+### Baixando SINASC 2013
+df_2013 <- fetch_datasus(
   year_start = 2013,
   year_end = 2013,
-  information_system = "SINASC")
+  information_system = "SINASC",
+  vars = c("CODMUNRES", "DTNASC", "MESPRENAT", "SEMAGESTAC")) |>
+  # CONSPRENAT não é definada para o ano de 2013
+  mutate(CONSPRENAT = NA)
 
-df_ano <- df_ano |> select(CODMUNRES, DTNASC, MESPRENAT, SEMAGESTAC)
-
-df_ano$ano <- 2013
-df_ano$CONSPRENAT <- NA
-
-df_list[[2013 - 2011]] <- df_ano
-
-# Unificando a lista de data frames em um unico
-df <- bind_rows(df_list)
-rm(df_list, df_ano)
-
-# data.table::fwrite(df, "data-raw/csv/dados_sinasc_bloco3.csv")
-# df <- data.table::fread("data-raw/csv/dados_sinasc_bloco3.csv")
-
-# df_proc <- process_sinasc(df1, municipality_data = T) |>
-#   select(
-#     CODMUNRES,
-#     DTNASC,
-#     CONSPRENAT,
-#     MESPRENAT,
-#     SEMAGESTAC
-#   ) |>
-#   mutate(
-#     ano = as.numeric(substr(DTNASC, 1, 4))
-#   )
-
-options(timeout=99999)
+### Baixando SINASC 2014-2024
+df_2014_2024 <- fetch_datasus(
+  year_start = 2014,
+  year_end = 2024,
+  information_system = "SINASC",
+  vars = c("CODMUNRES", "DTNASC", "CONSPRENAT", "MESPRENAT", "SEMAGESTAC"))
 
 ## Baixando os dados preliminares do SINASC de 2025 e selecionando as variáveis de interesse
+options(timeout=99999)
+
 temp_zip <- tempfile(fileext = ".zip")
 temp_dir <- tempdir()
 
+### Baixando SINASC 2025
 download.file("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SINASC/csv/SINASC_2025_csv.zip",
               temp_zip, mode = "wb")
 
 files <- unzip(temp_zip, exdir = temp_dir)
 
 df_sinasc_preliminares <- fread(files[1], sep = ";") |>
-  mutate(ano = 2025) |>
-  select(ano, CODMUNRES, DTNASC, CONSPRENAT, MESPRENAT, SEMAGESTAC)
+  select(CODMUNRES, DTNASC, CONSPRENAT, MESPRENAT, SEMAGESTAC)
 
-# Juntar os dataframes da lista em um único dataframe
-df <- rbind(df, df_sinasc_preliminares)
+## Juntando os dataframes
+df <- rbind(df_2012, df_2013, df_2014_2024, df_sinasc_preliminares) |>
+  clean_names() |>
+  ano = as.numeric(substr(dtnasc, nchar(dtnasc) - 3, nchar(dtnasc)))
 
-# Tratando os dados
+rm(df_2012, df_2013, df_2014_2024, df_sinasc_preliminares)
+
+# Tratando os dados e calculando indicadores ------------------------------
 df2 <- df |>
   mutate(
     codmunres = as.numeric(CODMUNRES),
@@ -92,11 +76,11 @@ df2 <- df |>
     SEMAGESTAC = as.numeric(SEMAGESTAC)
   ) |>
   mutate(
+    nascidos = 1,
 
-    nascidos= 1,
     pelo_menos_uma_consulta_prenatal = case_when(
       CONSPRENAT >= 1 ~ 1,
-      !(CONSPRENAT >= 1) ~0
+      !(CONSPRENAT >= 1) ~ 0
     ),
     inicio_precoce_do_prenatal = case_when(
       (MESPRENAT ==  1 | MESPRENAT == 2 | MESPRENAT ==  3) ~ 1,
@@ -125,9 +109,7 @@ df2 <- df |>
           (SEMAGESTAC >= 38 & SEMAGESTAC < 40 & CONSPRENAT >= 7) |
           (SEMAGESTAC >= 40 & SEMAGESTAC < 99 & CONSPRENAT >= 8 & CONSPRENAT < 99)) ~ 0
     )
-
   ) |>
-  #select(codmunres, ano, nascidos) |>
   group_by(codmunres, ano) |>
   summarise(
     total_de_nascidos_vivos = sum(nascidos),
@@ -140,17 +122,10 @@ df2 <- df |>
 
 rm(df)
 
-# Criando um objeto que recebe os códigos dos municípios que utilizamos no painel
-codigos_municipios <- read_csv("data-raw/extracao-dos-dados/blocos/databases_auxiliares/tabela_aux_municipios.csv") |>
-  pull(municipio)
-
-# Criando um data.frame auxiliar que possui uma linha para cada combinação de município e ano
-df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(2012:2025)), ano = 2012:2025)
-
-# Transformando as colunas que estão em caracter para numéricas
+### Transformando as colunas que estão em caracter para numéricas
 df2 <- df2 |> mutate_if(is.character, as.numeric)
 
-# Fazendo um left_join da base auxiliar de municípios com o data.frame que contém o total de nascidos vivos
+### Fazendo um left_join da base auxiliar de municípios com o data.frame que contém o total de nascidos vivos
 df_bloco3 <- left_join(df_aux_municipios, df2)
 
 df_bloco3[is.na(df_bloco3)] <- 0
@@ -158,7 +133,7 @@ df_bloco3[is.na(df_bloco3)] <- 0
 rm(df2)
 
 # Incidência de sífilis congênita por mil nascidos vivos ------------------
-# Lendo a base de dados obtida pelo site http://indicadoressifilis.aids.gov.br/
+## Lendo a base de dados obtida pelo site http://indicadoressifilis.aids.gov.br/
 df_sifilis_excel1 <- read_excel("data-raw/extracao-dos-dados/blocos/databases_auxiliares/dados_painel_sifilis_2022.xlsx",
                                sheet = "DADOS CONTINUAÇÃO 2"
 )
@@ -167,7 +142,7 @@ df_sifilis_excel2 <- read_excel("data-raw/extracao-dos-dados/blocos/databases_au
                                 sheet = "DADOS CONTINUAÇÃO 2"
 )
 
-# Corrigindo os nomes das colunas e filtrando pelos municípios que utilizamos no painel
+### Corrigindo os nomes das colunas e filtrando pelos municípios que utilizamos no painel
 names(df_sifilis_excel1) <- as.character(df_sifilis_excel1[1,])
 names(df_sifilis_excel2) <- as.character(df_sifilis_excel2[1,])
 
@@ -195,7 +170,7 @@ df_sifilis2 <- df_sifilis_excel2[-1, ] |>
   filter(codmunres %in% df_aux_municipios$codmunres) |>
   mutate_if(is.character, as.numeric)
 
-# Passando para o formato long
+### Passando o data.frame para o formato long
 df_sifilis_long1 <- df_sifilis1 |>
   pivot_longer(
     cols = !codmunres,
@@ -216,14 +191,15 @@ df_sifilis_long2 <- df_sifilis2 |>
 
 df_sifilis_long <- rbind(df_sifilis_long1, df_sifilis_long2)
 
-# Juntando com o restante da base do bloco 3
+## Juntando com o restante da base do bloco 3
 df_bloco3 <- left_join(df_bloco3, df_sifilis_long)
 
-# Substituindo os NA's da coluna 'casos_sc' por 0 (gerados após o left_join)
+### Substituindo os NA's da coluna 'casos_sc' por 0 (gerados após o left_join)
 df_bloco3$casos_sc[is.na(df_bloco3$casos_sc)] <- 0
 
-# Não temos dados para a Incidência de sífilis congênita para o ano de 2024 --(provisorio remover quando a base for atualizada para 2024)--
-# Substituindo os 0 da coluna 'casos_sc' por NA para o ano de 2024
+# Não temos dados para a Incidência de sífilis congênita para o ano de 2024 -- (provisorio remover quando a base for atualizada para 2024) --
+
+### Substituindo os 0 da coluna 'casos_sc' por NA para o ano de 2024
 df_bloco3$casos_sc[df_bloco3$ano == 2024] <- NA
 
 # Salvando a base de dados completa -----------------

@@ -627,15 +627,15 @@ mod_bloco_6_server <- function(id, filtros){
       porc_mmg_cirurgia_sus = rep("round(sum(casos_mmg_sus_cirurgia) / sum(casos_mmg_sus) * 100, 1)", 2),
 
       # Morbidade materna na ANS
-      soma_casos_mmg_ans = rep("sum(casos_mmg_ans[ano >= 2015])", 2),
-      porc_mmg_ans = rep("round(sum(casos_mmg_ans[ano >= 2015]) / sum(total_internacoes_ans[ano >= 2015]) * 100, 1)", 2),
-      porc_mmg_hipertensao_ans = rep("round(sum(casos_mmg_ans_hipertensao[ano >= 2015]) / sum(casos_mmg_ans[ano >= 2015]) * 100, 1)", 2),
-      porc_mmg_hemorragia_ans = rep("round(sum(casos_mmg_ans_hemorragia[ano >= 2015]) / sum(casos_mmg_ans[ano >= 2015]) * 100, 1)", 2),
-      porc_mmg_infeccao_ans = rep("round(sum(casos_mmg_ans_infeccoes[ano >= 2015]) / sum(casos_mmg_ans[ano >= 2015]) * 100, 1)", 2),
-      porc_mmg_uti_ans = rep("round(sum(casos_mmg_ans_uti[ano >= 2015]) / sum(casos_mmg_ans[ano >= 2015]) * 100, 1)", 2),
-      porc_mmg_tmp_ans = rep("round(sum(casos_mmg_ans_tmp[ano >= 2015]) / sum(casos_mmg_ans[ano >= 2015]) * 100, 1)", 2),
-      porc_mmg_transfusao_ans = rep("round(sum(casos_mmg_ans_transfusao[ano >= 2015]) / sum(casos_mmg_ans[ano >= 2015]) * 100, 1)", 2),
-      porc_mmg_cirurgia_ans = rep("round(sum(casos_mmg_ans_cirurgia[ano >= 2015]) / sum(casos_mmg_ans[ano >= 2015]) * 100, 1)", 2)
+      soma_casos_mmg_ans = rep("sum(casos_mmg_ans[ano >= 2015 & ano <= 2024])", 2),
+      porc_mmg_ans = rep("round(sum(casos_mmg_ans[ano >= 2015 & ano <= 2024]) / sum(total_internacoes_ans[ano >= 2015 & ano <= 2024]) * 100, 1)", 2),
+      porc_mmg_hipertensao_ans = rep("round(sum(casos_mmg_ans_hipertensao[ano >= 2015 & ano <= 2024]) / sum(casos_mmg_ans[ano >= 2015 & ano <= 2024]) * 100, 1)", 2),
+      porc_mmg_hemorragia_ans = rep("round(sum(casos_mmg_ans_hemorragia[ano >= 2015 & ano <= 2024]) / sum(casos_mmg_ans[ano >= 2015 & ano <= 2024]) * 100, 1)", 2),
+      porc_mmg_infeccao_ans = rep("round(sum(casos_mmg_ans_infeccoes[ano >= 2015 & ano <= 2024]) / sum(casos_mmg_ans[ano >= 2015 & ano <= 2024]) * 100, 1)", 2),
+      porc_mmg_uti_ans = rep("round(sum(casos_mmg_ans_uti[ano >= 2015 & ano <= 2024]) / sum(casos_mmg_ans[ano >= 2015 & ano <= 2024]) * 100, 1)", 2),
+      porc_mmg_tmp_ans = rep("round(sum(casos_mmg_ans_tmp[ano >= 2015 & ano <= 2024]) / sum(casos_mmg_ans[ano >= 2015 & ano <= 2024]) * 100, 1)", 2),
+      porc_mmg_transfusao_ans = rep("round(sum(casos_mmg_ans_transfusao[ano >= 2015 & ano <= 2024]) / sum(casos_mmg_ans[ano >= 2015 & ano <= 2024]) * 100, 1)", 2),
+      porc_mmg_cirurgia_ans = rep("round(sum(casos_mmg_ans_cirurgia[ano >= 2015 & ano <= 2024]) / sum(casos_mmg_ans[ano >= 2015 & ano <= 2024]) * 100, 1)", 2)
     )
 
     bloco6_calcs_resumo <- bloco6_calcs |>

@@ -16,8 +16,8 @@ codigos_municipios <- read.csv("data-raw/extracao-dos-dados/blocos/databases_aux
 df_incompletude_bloco7 <- data.frame(codmunres = rep(codigos_municipios, each = length(2012:2024)), ano = 2012:2024)
 
 df_dofet_consolidado <- fetch_datasus(
-  year_start = 2012,
-  year_end = 2023,
+  year_start = 2023,
+  year_end = 2024,
   vars = c("CODMUNRES", "DTOBITO", "PESO", "GESTACAO", "SEMAGESTAC", "OBITOPARTO"),
   information_system = "SIM-DOFET"
 ) |>
@@ -30,7 +30,7 @@ df_dofet_consolidado <- fetch_datasus(
     obitoparto = as.numeric(obitoparto)
   )
 
-df_sim_dofet_2024 <- fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/DO24OPEN.csv") |>
+df_sim_dofet_2024 <- fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/csv/DO25OPEN_csv.zip") |>
   clean_names() |>
   filter(tipobito == 1) |>
   select(codmunres, dtobito, peso, gestacao, semagestac, obitoparto)|>
@@ -75,8 +75,8 @@ df_incompletude_bloco7 <- left_join(df_incompletude_bloco7, df_fetal_incompletud
 ########### INCOMPLETUDE NEONATAL
 
 df_doinf_consolidado <- fetch_datasus(
-  year_start = 2012,
-  year_end = 2023,
+  year_start = 2023,
+  year_end = 2024,
   vars = c("CODMUNRES", "DTOBITO", "IDADE", "PESO"),
   information_system = "SIM-DOINF"
 ) |>
@@ -88,7 +88,7 @@ df_doinf_consolidado <- fetch_datasus(
   )
 
 
-df_sim_doinf_2024 <- fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/DO24OPEN.csv") |>
+df_sim_doinf_2024 <- fread("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/csv/DO25OPEN_csv.zip") |>
   clean_names() |>
   filter(idade <= 400) |>
   select(codmunres, dtobito, peso, idade)|>
@@ -122,4 +122,4 @@ df_neonatal_incompletude <- df_sim_doinf |>
 df_incompletude_bloco7 <- left_join(df_incompletude_bloco7, df_neonatal_incompletude, by = c("ano", "codmunres"))
 
 
-write.csv(df_incompletude_bloco7, 'data-raw/csv/indicadores_incompletude_bloco7_2012-2024.csv', sep = ",", dec = ".", row.names = FALSE)
+write.csv(df_incompletude_bloco7, 'data-raw/csv/indicadores_incompletude_bloco7_2023-2025.csv', sep = ",", dec = ".", row.names = FALSE)
