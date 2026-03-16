@@ -1833,8 +1833,6 @@ mod_bloco_7_fetal_server <- function(id, filtros){
       dplyr::full_join(data7_comp_principais(), data7_referencia_principais())
     })
 
-    observe(print(data7_principais_completo()))
-
     output$plot_causas_principais <- highcharter::renderHighchart({
       if (filtros()$comparar == "Não") {
         grafico_base <- highcharter::highchart() |>
