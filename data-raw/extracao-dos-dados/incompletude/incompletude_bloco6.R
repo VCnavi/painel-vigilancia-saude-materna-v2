@@ -1,3 +1,9 @@
+library(rvest)
+library(httr)
+library(dplyr)
+library(readr)
+
+
 # Função para fazer webscrapping do Tabnet
 tabnet_obitos_mif_maternos <- function(anos,
                                        tipo_obito # opções: "Óbitos_mulheres_idade_fértil" ou "Óbitos_maternos"
@@ -24,6 +30,10 @@ tabnet_obitos_mif_maternos <- function(anos,
   #     stringsAsFactors = FALSE
   #   )
   # }
+  # Opções para o argumento "name":
+  # html %>%
+  #   html_elements("select") %>%
+  #   html_attr("name")
   #
   # # Extraindo as opções de Linha, Coluna e Arquivos
   # opcoes_linha <- get_options(html, "Linha")
@@ -44,6 +54,7 @@ tabnet_obitos_mif_maternos <- function(anos,
       Incremento = iconv(tipo_obito, to = "ISO-8859-1"),
       Arquivos = paste0("matbr", substr(i, 3, 4), ".dbf"),
       Formato = "table",
+      zeradas = "exibirlz",
       pesqmes1 = "Digite o texto e ache fácil",
       Submet = "Mostre"
     )
@@ -91,7 +102,7 @@ tabnet_obitos_mif_maternos <- function(anos,
 ## ---------- Óbitos de Mulheres em Idade Fértil -------
 
 # Anos a serem baixados
-anos <- c(2022:2024)
+anos <- c(2012:2024)
 
 codigos_municipios <- read.csv("data-raw/extracao-dos-dados/blocos/databases_auxiliares/tabela_aux_municipios.csv") |>
   pull(codmunres) |>
@@ -105,26 +116,34 @@ df_obitos_mif_aux <- tabnet_obitos_mif_maternos(anos, "Óbitos_mulheres_idade_f�
   mutate(
     codmunres = substr(`Município`, 1, 6),
     Obito_MIF_investigado_com_Ficha_Sintese = case_when(
-      `Óbito investigado, com ficha síntese informada` == "-" ~ 0,
+      `Óbito investigado, com ficha síntese informada` == "-" ~ "0",
       TRUE ~ `Óbito investigado, com ficha síntese informada`
     ),
     Obito_MIF_investigado_sem_Ficha_Sintese = case_when(
-      `Óbito investigado, sem ficha síntese informada` == "-" ~ 0,
+      `Óbito investigado, sem ficha síntese informada` == "-" ~ "0",
       TRUE ~ `Óbito investigado, sem ficha síntese informada`
     ),
-    TOTAL_OBITOS_MULHER_IDADE_FERTIL = Total
+    TOTAL_OBITOS_MULHER_IDADE_FERTIL = case_when(
+      Total == "-" ~ "0",
+      TRUE ~ Total
+    )
   ) |>
   select(codmunres, ano, Obito_MIF_investigado_com_Ficha_Sintese,
          Obito_MIF_investigado_sem_Ficha_Sintese, TOTAL_OBITOS_MULHER_IDADE_FERTIL)
 
+df_obitos_mif_aux$Obito_MIF_investigado_com_Ficha_Sintese <- as.numeric(df_obitos_mif_aux$Obito_MIF_investigado_com_Ficha_Sintese)
+df_obitos_mif_aux$Obito_MIF_investigado_sem_Ficha_Sintese <- as.numeric(df_obitos_mif_aux$Obito_MIF_investigado_sem_Ficha_Sintese)
+df_obitos_mif_aux$TOTAL_OBITOS_MULHER_IDADE_FERTIL <- as.numeric(df_obitos_mif_aux$TOTAL_OBITOS_MULHER_IDADE_FERTIL)
+
+
 df_obitos_mif <- left_join(df_tabela_municipios, df_obitos_mif_aux)
 
-write.csv(df_obitos_mif, "data-raw/csv/incompletude_sim_obitos_mif_2022_2024.csv")
+write.csv(df_obitos_mif, "data-raw/csv/incompletude_sim_obitos_mif_2012_2024.csv")
 
 ## ---------- Óbitos Maternos -------
 
 # Anos a serem baixados
-anos <- c(2022:2024)
+anos <- c(2012:2024)
 
 codigos_municipios <- read.csv("data-raw/extracao-dos-dados/blocos/databases_auxiliares/tabela_aux_municipios.csv") |>
   pull(codmunres) |>
@@ -138,18 +157,27 @@ df_obitos_maternos_aux <- tabnet_obitos_mif_maternos(anos, "Óbitos_maternos") |
   mutate(
     codmunres = substr(`Município`, 1, 6),
     Obito_Materno_investigado_com_Ficha_Sintese = case_when(
-      `Óbito investigado, com ficha síntese informada` == "-" ~ 0,
+      `Óbito investigado, com ficha síntese informada` == "-" ~ "0",
       TRUE ~ `Óbito investigado, com ficha síntese informada`
     ),
     Obito_Materno_investigado_sem_Ficha_Sintese = case_when(
-      `Óbito investigado, sem ficha síntese informada` == "-" ~ 0,
+      `Óbito investigado, sem ficha síntese informada` == "-" ~ "0",
       TRUE ~ `Óbito investigado, sem ficha síntese informada`
     ),
-    TOTAL_OBITOS_MATERNOS = Total
+    TOTAL_OBITOS_MATERNOS = case_when(
+      Total == "-" ~ "0",
+      TRUE ~ Total
+    )
   ) |>
   select(codmunres, ano, Obito_Materno_investigado_com_Ficha_Sintese,
-         Obito_Materno_investigado_sem_Ficha_Sintese, TOTAL_OBITOS_MATERNOS)
+         Obito_Materno_investigado_sem_Ficha_Sintese, TOTAL_OBITOS_MATERNOS) |>
+  filter(codmunres %in% df_tabela_municipios$codmunres)
 
-df_obitos_maternos <- left_join(df_tabela_municipios, df_obitos_maternos_aux)
+df_obitos_maternos_aux$Obito_Materno_investigado_com_Ficha_Sintese <- as.numeric(df_obitos_maternos_aux$Obito_Materno_investigado_com_Ficha_Sintese)
+df_obitos_maternos_aux$Obito_Materno_investigado_sem_Ficha_Sintese <- as.numeric(df_obitos_maternos_aux$Obito_Materno_investigado_sem_Ficha_Sintese)
+df_obitos_maternos_aux$TOTAL_OBITOS_MATERNOS <- as.numeric(df_obitos_maternos_aux$TOTAL_OBITOS_MATERNOS)
+df_obitos_maternos_aux$ano <- as.integer(df_obitos_maternos_aux$ano)
 
-write.csv(df_obitos_maternos, "data-raw/csv/incompletude_sim_obitos_maternos_2022_2024.csv")
+df_obitos_maternos <- left_join(df_tabela_municipios, df_obitos_maternos_aux, by = c("codmunres", "ano"))
+
+write.csv(df_obitos_maternos, "data-raw/csv/incompletude_sim_obitos_maternos_2012_2024.csv")

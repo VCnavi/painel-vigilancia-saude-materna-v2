@@ -492,11 +492,10 @@ base_incompletude_sim <- base_incompletude_sim |>
 
 ### Para os indicadores de incompletude do SIM (bloco 7) -----------------
 #### Lendo o arquivo contendo todos os indicadores de incompletude de morbidade neonatal
-base_incompletude_bloco7_morbidade_aux <- read.csv('data-raw/csv/indicadores_incompletude_bloco7_morbidade_2012-2023.csv')
+base_incompletude_bloco7_morbidade_aux <- read.csv('data-raw/csv/indicadores_incompletude_bloco7_morbidade_2012-2025.csv')
 
 #### Lendo o arquivo contendo todos os indicadores de incompletude das outras abas
-base_incompletude_bloco7_outros_aux <- read.csv('data-raw/csv/indicadores_incompletude_bloco7_2012-2024.csv') |>
-  dplyr::filter(ano <= 2023) |>
+base_incompletude_bloco7_outros_aux <- read.csv('data-raw/csv/indicadores_incompletude_bloco7_2012-2025.csv') |>
   dplyr::mutate(across(everything(), ~tidyr::replace_na(.x, 0)))
 
 #### Juntando as duas bases

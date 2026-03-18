@@ -692,7 +692,7 @@ mod_nivel_3_server <- function(id, filtros, titulo_localidade_aux){
       }
 
       if (infos_indicador()$nome_abreviado %in% indicadores_2024) {
-        anos_disponiveis_aux <- anos_disponiveis_aux[anos_disponiveis_aux <= 2023]
+        anos_disponiveis_aux <- anos_disponiveis_aux[anos_disponiveis_aux <= max(unique(base_incompletude$ano))]
       } else {
         anos_disponiveis_aux
       }
@@ -862,7 +862,7 @@ mod_nivel_3_server <- function(id, filtros, titulo_localidade_aux){
           ) |>
           dplyr::ungroup() |>
           dplyr::filter(ano <= ifelse(infos_indicador()$bloco == "bloco6", 2024,
-                                      ifelse(grepl("bloco4_deslocamento", infos_indicador()$bloco), 2020, 2023)))
+                                      ifelse(grepl("bloco4_deslocamento", infos_indicador()$bloco), 2020, 2025)))
       }
     })
 
@@ -912,7 +912,7 @@ mod_nivel_3_server <- function(id, filtros, titulo_localidade_aux){
           ) |>
           dplyr::ungroup() |>
           dplyr::filter(ano <= ifelse(infos_indicador()$bloco == "bloco6", 2024,
-                                      ifelse(grepl("bloco4_deslocamento", infos_indicador()$bloco), 2020, 2023)))
+                                      ifelse(grepl("bloco4_deslocamento", infos_indicador()$bloco), 2020, 2025)))
       }
     })
 
@@ -962,7 +962,7 @@ mod_nivel_3_server <- function(id, filtros, titulo_localidade_aux){
           ) |>
           dplyr::ungroup() |>
           dplyr::filter(ano <= ifelse(infos_indicador()$bloco == "bloco6", 2024,
-                                      ifelse(grepl("bloco4_deslocamento", infos_indicador()$bloco), 2020, 2023)))
+                                      ifelse(grepl("bloco4_deslocamento", infos_indicador()$bloco), 2020, 2025)))
       }
     })
 
@@ -972,7 +972,7 @@ mod_nivel_3_server <- function(id, filtros, titulo_localidade_aux){
         valor = c(rep(10, times = length(anos_disponiveis())), rep(5, times = length(anos_disponiveis()))),
         class = c(rep("Bom", times = length(anos_disponiveis())), rep("Excelente", times = length(anos_disponiveis())))
       ) |>
-        dplyr::filter(ano <= ifelse(grepl("bloco4_deslocamento", infos_indicador()$bloco), 2020, 2023))
+        dplyr::filter(ano <= ifelse(grepl("bloco4_deslocamento", infos_indicador()$bloco), 2020, 2025))
     })
 
     data_referencia_incompletude_blocos6 <- reactive({

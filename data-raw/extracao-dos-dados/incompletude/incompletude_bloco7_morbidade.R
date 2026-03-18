@@ -16,7 +16,7 @@ vars <- c("PESO", "GESTACAO", "SEMAGESTAC", "APGAR5")
 
 # Inserir informações:
 # Todos os anos a serem baixados
-anos <- c(2023:2025)
+anos <- c(2012:2025)
 # Ano baixado pelo opendatasus
 ano_opendatasus <- 2025
 # Links para o ano baixado pelo opendatasus
@@ -25,6 +25,8 @@ link_opendatasus_sinasc <- "https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br
 codigos_municipios <- read.csv("data-raw/extracao-dos-dados/blocos/databases_auxiliares/tabela_aux_municipios.csv") |>
   pull(codmunres) |>
   as.character()
+
+df_aux_municipios <- data.frame(codmunres = rep(codigos_municipios, each = length(anos)), ano = anos)
 
 ## Criando data.frames que irão receber os dados dos indicadores de causas evitáveis e grupos de causa
 df_sinasc_incompletude_aux <- data.frame(codmunres = rep(codigos_municipios, each = length(anos)), ano = anos)
@@ -154,4 +156,4 @@ df_incompletude_bloco7_morbidade <- df_sinasc |>
   arrange(codmunres, ano)
 
 ## Exportando os dados
-write.csv(df_incompletude_bloco7_morbidade, 'data-raw/csv/indicadores_incompletude_bloco7_morbidade_2023-2025.csv', row.names = FALSE)
+write.csv(df_incompletude_bloco7_morbidade, 'data-raw/csv/indicadores_incompletude_bloco7_morbidade_2012-2025.csv', row.names = FALSE)

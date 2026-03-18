@@ -13,10 +13,10 @@ codigos_municipios <- read.csv("data-raw/extracao-dos-dados/blocos/databases_aux
   as.character()
 
 ## Criando data.frames que irão receber os dados dos indicadores de causas evitáveis e grupos de causa
-df_incompletude_bloco7 <- data.frame(codmunres = rep(codigos_municipios, each = length(2012:2024)), ano = 2012:2024)
+df_incompletude_bloco7 <- data.frame(codmunres = rep(codigos_municipios, each = length(2012:2025)), ano = 2012:2025)
 
 df_dofet_consolidado <- fetch_datasus(
-  year_start = 2023,
+  year_start = 2012,
   year_end = 2024,
   vars = c("CODMUNRES", "DTOBITO", "PESO", "GESTACAO", "SEMAGESTAC", "OBITOPARTO"),
   information_system = "SIM-DOFET"
@@ -75,7 +75,7 @@ df_incompletude_bloco7 <- left_join(df_incompletude_bloco7, df_fetal_incompletud
 ########### INCOMPLETUDE NEONATAL
 
 df_doinf_consolidado <- fetch_datasus(
-  year_start = 2023,
+  year_start = 2012,
   year_end = 2024,
   vars = c("CODMUNRES", "DTOBITO", "IDADE", "PESO"),
   information_system = "SIM-DOINF"
@@ -121,5 +121,4 @@ df_neonatal_incompletude <- df_sim_doinf |>
 
 df_incompletude_bloco7 <- left_join(df_incompletude_bloco7, df_neonatal_incompletude, by = c("ano", "codmunres"))
 
-
-write.csv(df_incompletude_bloco7, 'data-raw/csv/indicadores_incompletude_bloco7_2023-2025.csv', sep = ",", dec = ".", row.names = FALSE)
+write.csv(df_incompletude_bloco7, 'data-raw/csv/indicadores_incompletude_bloco7_2012-2025.csv', sep = ",", dec = ".", row.names = FALSE)
