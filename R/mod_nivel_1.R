@@ -1491,8 +1491,6 @@ mod_nivel_1_server <- function(id, filtros) {
       ignoreNULL = FALSE
     )
 
-    observe(print(data2()))
-
     #### Criando o output que recebe o arquivo para impressão #####
     output$report <- downloadHandler(
       filename = reactive(paste0("relatorio_indicadores_", localidade_relatorio(), "_", filtros()$ano, ".pdf")),
@@ -2212,10 +2210,10 @@ mod_nivel_1_server <- function(id, filtros) {
           total_de_nascidos_vivos = sum(total_de_nascidos_vivos),
           porc_menor20 = round(sum(nvm_menor_que_20)/sum(populacao_feminina_10_a_14 + populacao_feminina_15_a_19)*1000, 1),
           porc_mais_3pt = round(sum(mulheres_com_mais_de_tres_partos_anteriores)/total_de_nascidos_vivos*100, 1),
-          tx_abortos_mil_mulheres_valor_medio_sus = round((((sum(abortos_sus_menor_30[ano >= 2015 & ano <= 2023]) * 0.9) + (sum(abortos_sus_30_a_39[ano >= 2015 & ano <= 2023]) * 0.85) + (sum(abortos_sus_40_a_49[ano >= 2015 & ano <= 2023]) * 0.75)) * 4) / sum(pop_fem_sus_10_49[ano >= 2015 & ano <= 2023]) * 1000, 1),
-          tx_abortos_mil_mulheres_valor_medio_ans = round((((sum(abortos_ans_menor_30[ano >= 2015 & ano <= 2023]) * 0.9) + (sum(abortos_ans_30_a_39[ano >= 2015 & ano <= 2023]) * 0.85) + (sum(abortos_ans_40_a_49[ano >= 2015 & ano <= 2023]) * 0.75)) * 5) / sum(pop_fem_ans_10_49[ano >= 2015 & ano <= 2023]) * 1000, 1),
-          tx_abortos_cem_nascidos_vivos_valor_medio_sus = round((((sum(abortos_sus_menor_30[ano >= 2015 & ano <= 2023]) * 0.9) + (sum(abortos_sus_30_a_39[ano >= 2015 & ano <= 2023]) * 0.85) + (sum(abortos_sus_40_a_49[ano >= 2015 & ano <= 2023]) * 0.75)) * 4) / sum(total_de_nascidos_vivos_10_a_49_sus[ano >= 2015 & ano <= 2023]) * 100, 1),
-          tx_abortos_cem_nascidos_vivos_valor_medio_ans = round((((sum(abortos_ans_menor_30[ano >= 2015 & ano <= 2023]) * 0.9) + (sum(abortos_ans_30_a_39[ano >= 2015 & ano <= 2023]) * 0.85) + (sum(abortos_ans_40_a_49[ano >= 2015 & ano <= 2023]) * 0.75)) * 5) / sum(total_de_nascidos_vivos_10_a_49_ans[ano >= 2015 & ano <= 2023]) * 100, 1)
+          tx_abortos_mil_mulheres_valor_medio_sus = round((((sum(abortos_sus_menor_30[ano >= 2015 & ano <= 2024]) * 0.9) + (sum(abortos_sus_30_a_39[ano >= 2015 & ano <= 2024]) * 0.85) + (sum(abortos_sus_40_a_49[ano >= 2015 & ano <= 2024]) * 0.75)) * 4) / sum(pop_fem_sus_10_49[ano >= 2015 & ano <= 2024]) * 1000, 1),
+          tx_abortos_mil_mulheres_valor_medio_ans = round((((sum(abortos_ans_menor_30[ano >= 2015 & ano <= 2024]) * 0.9) + (sum(abortos_ans_30_a_39[ano >= 2015 & ano <= 2024]) * 0.85) + (sum(abortos_ans_40_a_49[ano >= 2015 & ano <= 2024]) * 0.75)) * 5) / sum(pop_fem_ans_10_49[ano >= 2015 & ano <= 2024]) * 1000, 1),
+          tx_abortos_cem_nascidos_vivos_valor_medio_sus = round((((sum(abortos_sus_menor_30[ano >= 2015 & ano <= 2024]) * 0.9) + (sum(abortos_sus_30_a_39[ano >= 2015 & ano <= 2024]) * 0.85) + (sum(abortos_sus_40_a_49[ano >= 2015 & ano <= 2024]) * 0.75)) * 4) / sum(total_de_nascidos_vivos_10_a_49_sus[ano >= 2015 & ano <= 2024]) * 100, 1),
+          tx_abortos_cem_nascidos_vivos_valor_medio_ans = round((((sum(abortos_ans_menor_30[ano >= 2015 & ano <= 2024]) * 0.9) + (sum(abortos_ans_30_a_39[ano >= 2015 & ano <= 2024]) * 0.85) + (sum(abortos_ans_40_a_49[ano >= 2015 & ano <= 2024]) * 0.75)) * 5) / sum(total_de_nascidos_vivos_10_a_49_ans[ano >= 2015 & ano <= 2024]) * 100, 1)
         ) |>
         dplyr::ungroup()
     })
@@ -2230,10 +2228,10 @@ mod_nivel_1_server <- function(id, filtros) {
           total_de_nascidos_vivos = sum(total_de_nascidos_vivos),
           porc_menor20 = 30,
           porc_mais_3pt = round(sum(mulheres_com_mais_de_tres_partos_anteriores)/total_de_nascidos_vivos*100, 1),
-          tx_abortos_mil_mulheres_valor_medio_sus = round((((sum(abortos_sus_menor_30[ano >= 2015 & ano <= 2023]) * 0.9) + (sum(abortos_sus_30_a_39[ano >= 2015 & ano <= 2023]) * 0.85) + (sum(abortos_sus_40_a_49[ano >= 2015 & ano <= 2023]) * 0.75)) * 4) / sum(pop_fem_sus_10_49[ano >= 2015 & ano <= 2023]) * 1000, 1),
-          tx_abortos_mil_mulheres_valor_medio_ans = round((((sum(abortos_ans_menor_30[ano >= 2015 & ano <= 2023]) * 0.9) + (sum(abortos_ans_30_a_39[ano >= 2015 & ano <= 2023]) * 0.85) + (sum(abortos_ans_40_a_49[ano >= 2015 & ano <= 2023]) * 0.75)) * 5) / sum(pop_fem_ans_10_49[ano >= 2015 & ano <= 2023]) * 1000, 1),
-          tx_abortos_cem_nascidos_vivos_valor_medio_sus = round((((sum(abortos_sus_menor_30[ano >= 2015 & ano <= 2023]) * 0.9) + (sum(abortos_sus_30_a_39[ano >= 2015 & ano <= 2023]) * 0.85) + (sum(abortos_sus_40_a_49[ano >= 2015 & ano <= 2023]) * 0.75)) * 4) / sum(total_de_nascidos_vivos_10_a_49_sus[ano >= 2015 & ano <= 2023]) * 100, 1),
-          tx_abortos_cem_nascidos_vivos_valor_medio_ans = round((((sum(abortos_ans_menor_30[ano >= 2015 & ano <= 2023]) * 0.9) + (sum(abortos_ans_30_a_39[ano >= 2015 & ano <= 2023]) * 0.85) + (sum(abortos_ans_40_a_49[ano >= 2015 & ano <= 2023]) * 0.75)) * 5) / sum(total_de_nascidos_vivos_10_a_49_ans[ano >= 2015 & ano <= 2023]) * 100, 1)
+          tx_abortos_mil_mulheres_valor_medio_sus = round((((sum(abortos_sus_menor_30[ano >= 2015 & ano <= 2024]) * 0.9) + (sum(abortos_sus_30_a_39[ano >= 2015 & ano <= 2024]) * 0.85) + (sum(abortos_sus_40_a_49[ano >= 2015 & ano <= 2024]) * 0.75)) * 4) / sum(pop_fem_sus_10_49[ano >= 2015 & ano <= 2024]) * 1000, 1),
+          tx_abortos_mil_mulheres_valor_medio_ans = round((((sum(abortos_ans_menor_30[ano >= 2015 & ano <= 2024]) * 0.9) + (sum(abortos_ans_30_a_39[ano >= 2015 & ano <= 2024]) * 0.85) + (sum(abortos_ans_40_a_49[ano >= 2015 & ano <= 2024]) * 0.75)) * 5) / sum(pop_fem_ans_10_49[ano >= 2015 & ano <= 2024]) * 1000, 1),
+          tx_abortos_cem_nascidos_vivos_valor_medio_sus = round((((sum(abortos_sus_menor_30[ano >= 2015 & ano <= 2024]) * 0.9) + (sum(abortos_sus_30_a_39[ano >= 2015 & ano <= 2024]) * 0.85) + (sum(abortos_sus_40_a_49[ano >= 2015 & ano <= 2024]) * 0.75)) * 4) / sum(total_de_nascidos_vivos_10_a_49_sus[ano >= 2015 & ano <= 2024]) * 100, 1),
+          tx_abortos_cem_nascidos_vivos_valor_medio_ans = round((((sum(abortos_ans_menor_30[ano >= 2015 & ano <= 2024]) * 0.9) + (sum(abortos_ans_30_a_39[ano >= 2015 & ano <= 2024]) * 0.85) + (sum(abortos_ans_40_a_49[ano >= 2015 & ano <= 2024]) * 0.75)) * 5) / sum(total_de_nascidos_vivos_10_a_49_ans[ano >= 2015 & ano <= 2024]) * 100, 1)
         ) |>
         dplyr::ungroup()
     })
@@ -2246,7 +2244,7 @@ mod_nivel_1_server <- function(id, filtros) {
         indicador = "porc_menor20",
         titulo = "Taxa específica de fecundidade de mulheres com menos de 20 anos de idade (por mil)",
         tem_meta = TRUE,
-        valor_de_referencia = 30,
+        valor_de_referencia = 20,
         tipo = "taxa",
         invertido = FALSE,
         pagina = "nivel_1",
