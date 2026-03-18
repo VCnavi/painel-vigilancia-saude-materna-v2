@@ -861,7 +861,8 @@ mod_nivel_3_server <- function(id, filtros, titulo_localidade_aux){
             )
           ) |>
           dplyr::ungroup() |>
-          dplyr::filter(ano <= ifelse(infos_indicador()$bloco == "bloco6" | grepl("bloco4_deslocamento", infos_indicador()$bloco), 2020, 2023))
+          dplyr::filter(ano <= ifelse(infos_indicador()$bloco == "bloco6", 2024,
+                                      ifelse(grepl("bloco4_deslocamento", infos_indicador()$bloco), 2020, 2023)))
       }
     })
 
@@ -910,7 +911,8 @@ mod_nivel_3_server <- function(id, filtros, titulo_localidade_aux){
             )
           ) |>
           dplyr::ungroup() |>
-          dplyr::filter(ano <= ifelse(infos_indicador()$bloco == "bloco6" | grepl("bloco4_deslocamento", infos_indicador()$bloco), 2020, 2023))
+          dplyr::filter(ano <= ifelse(infos_indicador()$bloco == "bloco6", 2024,
+                                      ifelse(grepl("bloco4_deslocamento", infos_indicador()$bloco), 2020, 2023)))
       }
     })
 
@@ -959,7 +961,8 @@ mod_nivel_3_server <- function(id, filtros, titulo_localidade_aux){
             )
           ) |>
           dplyr::ungroup() |>
-          dplyr::filter(ano <= ifelse(infos_indicador()$bloco == "bloco6" | grepl("bloco4_deslocamento", infos_indicador()$bloco), 2020, 2023))
+          dplyr::filter(ano <= ifelse(infos_indicador()$bloco == "bloco6", 2024,
+                                      ifelse(grepl("bloco4_deslocamento", infos_indicador()$bloco), 2020, 2023)))
       }
     })
 
@@ -979,7 +982,7 @@ mod_nivel_3_server <- function(id, filtros, titulo_localidade_aux){
         indicador = c(rep(escolha1(), times = length(anos_disponiveis())), rep(escolha2(), times = length(anos_disponiveis()))),
         class = rep("Ideal", times = length(anos_disponiveis()))
       ) |>
-        dplyr::filter(ano <= 2020)
+        dplyr::filter(ano <= 2024)
     })
 
     ## Criando os gráficos de linhas para a incompletude ----------------------
@@ -1065,7 +1068,7 @@ mod_nivel_3_server <- function(id, filtros, titulo_localidade_aux){
       #### Decidindo qual dataframe de referência de incompletude usar
       if (infos_indicador()$bloco == "bloco6") {
         data_referencia_incompletude <- data_referencia_incompletude_blocos6() |>
-          dplyr::filter(indicador == input$variavel_incompletude, ano <= 2020)
+          dplyr::filter(indicador == input$variavel_incompletude, ano <= 2024)
       } else {
         data_referencia_incompletude <- data_referencia_incompletude_blocos_gerais()
       }

@@ -470,12 +470,12 @@ base_incompletude_bloco4_profissional <- read.csv("data-raw/csv/indicadores_inco
 
 ### Para os indicadores de incompletude do SIM (bloco 6) -----------------
 #### Lendo o arquivo contendo todos os indicadores de incompletude de óbitos maternos
-base_incompletude_sim_maternos_aux <- read.csv("data-raw/csv/incompletude_sim_obitos_maternos.csv") |>
+base_incompletude_sim_maternos_aux <- read.csv("data-raw/csv/incompletude_sim_obitos_maternos_2012_2024.csv") |>
   janitor::clean_names() |>
   dplyr::filter(codmunres %in% tabela_aux_municipios$codmunres)
 
 #### Lendo o arquivo contendo todos os indicadores de incompletude de óbitos de MIF
-base_incompletude_sim_mif_aux <- read.csv("data-raw/csv/incompletude_sim_obitos_mif.csv") |>
+base_incompletude_sim_mif_aux <- read.csv("data-raw/csv/incompletude_sim_obitos_mif_2012_2024.csv") |>
   janitor::clean_names() |>
   dplyr::filter(codmunres %in% tabela_aux_municipios$codmunres)
 
